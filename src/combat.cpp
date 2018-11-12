@@ -492,6 +492,8 @@ void Combat::CombatHealthFunc(Creature* caster, Creature* target, const CombatPa
 
     Player* targetPlayer = target ? target->getPlayer() : nullptr;
     Player* casterPlayer = caster ? caster->getPlayer() : nullptr;
+	Monster* casterMonster = caster ? caster->getMonster() : nullptr;
+	Monster* targetMonster = target ? target->getMonster() : nullptr;
 
     if (damage.primary.value < 0 || damage.secondary.value < 0) {
         if (targetPlayer && casterPlayer && casterPlayer->hasSecureMode()) {
@@ -499,13 +501,14 @@ void Combat::CombatHealthFunc(Creature* caster, Creature* target, const CombatPa
         }
     }
 
-	if (const Monster* monster = caster ? caster->getMonster() : nullptr) {
-		if (targetPlayer) {
-			std::vector<int> TARGET_IGNORE_TILES = {3177, 3174, 3175, 3178, 3181, 3180, 3179, 3176, 3173};
-			if (std::find(TARGET_IGNORE_TILES.begin(), TARGET_IGNORE_TILES.end(), targetPlayer->getTile()->getGround()->getID()) != TARGET_IGNORE_TILES.end()) {
-				return;
-			}
-		}
+	Tile* tile = nullptr;
+	if (targetPlayer && casterMonster) {
+		tile = targetPlayer->getTile();
+	} else if (casterPlayer && targetMonster) {
+		tile = casterPlayer->getTile();
+	}
+	if (tile->isPad()) {
+		return;
 	}
 
     if (g_game.combatBlockHit(damage, caster, target, params.blockedByShield, params.blockedByArmor, params.itemId != 0)) {
@@ -532,14 +535,17 @@ void Combat::CombatManaFunc(Creature* caster, Creature* target, const CombatPara
 
     Player* targetPlayer = target ? target->getPlayer() : nullptr;
     Player* casterPlayer = caster ? caster->getPlayer() : nullptr;
+	Monster* casterMonster = caster ? caster->getMonster() : nullptr;
+	Monster* targetMonster = target ? target->getMonster() : nullptr;
 
-	if (const Monster* monster = caster ? caster->getMonster() : nullptr) {
-		if (targetPlayer) {
-			std::vector<int> TARGET_IGNORE_TILES = {10766, 10773, 10770, 10772, 10774, 10767, 11956, 11958, 11955, 11945};
-			if (std::find(TARGET_IGNORE_TILES.begin(), TARGET_IGNORE_TILES.end(), targetPlayer->getTile()->getGround()->getID()) != TARGET_IGNORE_TILES.end()) {
-				return;
-			}
-		}
+	Tile* tile = nullptr;
+	if (targetPlayer && casterMonster) {
+		tile = targetPlayer->getTile();
+	} else if (casterPlayer && targetMonster) {
+		tile = casterPlayer->getTile();
+	}
+	if (tile->isPad()) {
+		return;
 	}
 
     if (damageCopy.primary.value < 0) {
