@@ -583,7 +583,7 @@ void Creature::onCreatureMove(Creature* creature, const Tile* newTile, const Pos
 	}
 
 	if (const Monster* monster = this->getMonster()) {
-		if (newTile->isPad()) {
+		if (newTile && newTile->isPad()) {
 			onCreatureDisappear(attackedCreature, false);
 		}
 	}

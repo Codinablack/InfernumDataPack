@@ -626,7 +626,8 @@ bool Monster::isTarget(const Creature* creature) const
 		return false;
 	}
 
-	if (creature->getTile()->isPad()) {
+	const Tile* tile = creature->getTile();
+	if (tile && tile->isPad()) {
 		return false;
 	}
 

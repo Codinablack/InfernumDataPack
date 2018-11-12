@@ -507,7 +507,7 @@ void Combat::CombatHealthFunc(Creature* caster, Creature* target, const CombatPa
 	} else if (casterPlayer && targetMonster) {
 		tile = casterPlayer->getTile();
 	}
-	if (tile->isPad()) {
+	if (tile && tile->isPad()) {
 		return;
 	}
 
@@ -544,7 +544,7 @@ void Combat::CombatManaFunc(Creature* caster, Creature* target, const CombatPara
 	} else if (casterPlayer && targetMonster) {
 		tile = casterPlayer->getTile();
 	}
-	if (tile->isPad()) {
+	if (tile && tile->isPad()) {
 		return;
 	}
 

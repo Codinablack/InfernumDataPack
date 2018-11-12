@@ -426,9 +426,12 @@ void Weapon::onUsedWeapon(Player* player, Item* item, Tile* destTile) const
 	}
 
 	switch (action) {
-		case WEAPONACTION_REMOVECOUNT:
-			Weapon::decrementItemCount(item);
+		case WEAPONACTION_REMOVECOUNT: {
+			if (!g_config.getBoolean(ConfigManager::INFINITE_AMMO)) {
+				Weapon::decrementItemCount(item);
+			}
 			break;
+		}
 
 		case WEAPONACTION_REMOVECHARGE: {
 			uint16_t charges = item->getCharges();

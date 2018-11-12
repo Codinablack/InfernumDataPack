@@ -840,7 +840,7 @@ int_fast32_t AStarNodes::getTileWalkCost(const Creature& creature, const Tile* t
 		//destroy creature cost
 		cost += MAP_NORMALWALKCOST * 3;
 	}
-	if (tile->isPad()) {
+	if (tile && tile->isPad()) {
 		cost += MAP_NORMALWALKCOST * 18;
 	}
 	if (const MagicField* field = tile->getFieldItem()) {
