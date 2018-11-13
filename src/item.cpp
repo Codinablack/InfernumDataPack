@@ -569,6 +569,15 @@ Attr_ReadValue Item::readAttr(AttrTypes_t attr, PropStream& propStream)
 			break;
 		}
 
+		case ATTR_BONUSREGEN: {
+			uint16_t bonusRegen;
+			if (!propStream.read<uint16_t>(bonusRegen)) {
+				return ATTR_READ_ERROR;
+			}
+			setIntAttr(ITEM_ATTRIBUTE_BONUSREGEN, bonusRegen);
+			break;
+		}
+
 		//these should be handled through derived classes
 		//If these are called then something has changed in the items.xml since the map was saved
 		//just read the values
@@ -772,6 +781,11 @@ void Item::serializeAttr(PropWriteStream& propWriteStream) const
 	if (hasAttribute(ITEM_ATTRIBUTE_SHOOTRANGE)) {
 		propWriteStream.write<uint8_t>(ATTR_SHOOTRANGE);
 		propWriteStream.write<uint8_t>(getIntAttr(ITEM_ATTRIBUTE_SHOOTRANGE));
+	}
+
+	if (hasAttribute(ITEM_ATTRIBUTE_BONUSREGEN)) {
+		propWriteStream.write<uint16_t>(ATTR_BONUSREGEN);
+		propWriteStream.write<uint16_t>(getIntAttr(ITEM_ATTRIBUTE_BONUSREGEN));
 	}
 
 	if (hasAttribute(ITEM_ATTRIBUTE_CUSTOM)) {
@@ -1229,6 +1243,11 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance,
 
 				s << "speed " << std::showpos << (it.abilities->speed >> 1) << std::noshowpos;
 			}
+		}
+
+		uint16_t bonusRegen = item ? item->getRegen() : it.bonusRegen;
+		if (bonusRegen != 0) {
+			s << " (bonus regeneration: " << std::showpos << bonusRegen << std::noshowpos << "%)";
 		}
 
 		if (!begin) {

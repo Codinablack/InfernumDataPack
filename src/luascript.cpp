@@ -2540,6 +2540,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("ItemType", "getDefense", LuaScriptInterface::luaItemTypeGetDefense);
 	registerMethod("ItemType", "getExtraDefense", LuaScriptInterface::luaItemTypeGetExtraDefense);
 	registerMethod("ItemType", "getArmor", LuaScriptInterface::luaItemTypeGetArmor);
+	registerMethod("ItemType", "getRegen", LuaScriptInterface::luaItemTypeGetRegen);
 	registerMethod("ItemType", "getWeaponType", LuaScriptInterface::luaItemTypeGetWeaponType);
 
 	registerMethod("ItemType", "getElementType", LuaScriptInterface::luaItemTypeGetElementType);
@@ -11373,6 +11374,18 @@ int LuaScriptInterface::luaItemTypeGetArmor(lua_State* L)
 	const ItemType* itemType = getUserdata<const ItemType>(L, 1);
 	if (itemType) {
 		lua_pushnumber(L, itemType->armor);
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaItemTypeGetRegen(lua_State* L)
+{
+	// itemType:getRegen()
+	const ItemType* itemType = getUserdata<const ItemType>(L, 1);
+	if (itemType) {
+		lua_pushnumber(L, itemType->bonusRegen);
 	} else {
 		lua_pushnil(L);
 	}
