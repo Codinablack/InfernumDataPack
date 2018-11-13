@@ -652,7 +652,7 @@ void Combat::combatTileEffects(const SpectatorHashSet& spectators, Creature* cas
 			}
 		}
 
-		if (!tile->isPad()) {
+		if (tile && !tile->isPad()) {
 			Item* item = Item::CreateItem(itemId);
 			if (caster) {
 				item->setOwner(caster->getID());
