@@ -652,16 +652,18 @@ void Combat::combatTileEffects(const SpectatorHashSet& spectators, Creature* cas
 			}
 		}
 
-		Item* item = Item::CreateItem(itemId);
-		if (caster) {
-			item->setOwner(caster->getID());
-		}
+		if (!tile->isPad()) {
+			Item* item = Item::CreateItem(itemId);
+			if (caster) {
+				item->setOwner(caster->getID());
+			}
 
-		ReturnValue ret = g_game.internalAddItem(tile, item);
-		if (ret == RETURNVALUE_NOERROR) {
-			g_game.startDecay(item);
-		} else {
-			delete item;
+			ReturnValue ret = g_game.internalAddItem(tile, item);
+			if (ret == RETURNVALUE_NOERROR) {
+				g_game.startDecay(item);
+			} else {
+				delete item;
+			}
 		}
 	}
 
