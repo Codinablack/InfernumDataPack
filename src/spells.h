@@ -158,6 +158,9 @@ class Spell : public BaseSpell
 		uint8_t getSpellId() const {
 			return spellId;
 		}
+		SpellGroup_t getGroup() const {
+			return group;
+		}
 		bool isPremium() const {
 			return premium;
 		}
