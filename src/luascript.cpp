@@ -2693,6 +2693,7 @@ void LuaScriptInterface::registerFunctions()
 
 	registerMethod("Spell", "isPremium", LuaScriptInterface::luaSpellIsPremium);
 	registerMethod("Spell", "isLearnable", LuaScriptInterface::luaSpellIsLearnable);
+	registerMethod("Spell", "getId", LuaScriptInterface::luaSpellGetId);
 }
 
 #undef registerEnum
@@ -9662,7 +9663,11 @@ int LuaScriptInterface::luaPlayerCastSpell(lua_State* L)
 	InstantSpell* spell = getInstantSpell(L, 2);
 	std::string param = getString(L, 3);
 	if (player && spell) {
-		pushBoolean(L, spell->playerCastInstant(player, param));
+		bool result = spell->playerCastInstant(player, param);
+		if (result) {
+			g_game.internalCreatureSay(player, TALKTYPE_MONSTER_SAY, spell->getWords(), false);
+		}
+		pushBoolean(L, result);
 	} else {
 		lua_pushnil(L);
 	}
@@ -12835,6 +12840,17 @@ int LuaScriptInterface::luaSpellIsLearnable(lua_State* L)
 	// spell:isLearnable()
 	if (InstantSpell* spell = getInstantSpell(L, 1)) {
 		pushBoolean(L, spell->isLearnable());
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaSpellGetId(lua_State* L)
+{
+	// spell:getId()
+	if (InstantSpell* spell = getInstantSpell(L, 1)) {
+		lua_pushnumber(L, spell->getSpellId());
 	} else {
 		lua_pushnil(L);
 	}

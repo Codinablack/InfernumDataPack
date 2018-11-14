@@ -155,6 +155,9 @@ class Spell : public BaseSpell
 		uint32_t getGroupCooldown() const {
 			return groupCooldown;
 		}
+		uint8_t getSpellId() const {
+			return spellId;
+		}
 		bool isPremium() const {
 			return premium;
 		}

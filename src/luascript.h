@@ -1297,6 +1297,8 @@ class LuaScriptInterface
 		static int luaSpellIsPremium(lua_State* L);
 		static int luaSpellIsLearnable(lua_State* L);
 
+		static int luaSpellGetId(lua_State* L);
+
 		//
 		std::string lastLuaError;
 
