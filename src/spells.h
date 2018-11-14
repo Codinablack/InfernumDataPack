@@ -149,6 +149,12 @@ class Spell : public BaseSpell
 		uint32_t getManaPercent() const {
 			return manaPercent;
 		}
+		uint32_t getCooldown() const {
+			return cooldown;
+		}
+		uint32_t getGroupCooldown() const {
+			return groupCooldown;
+		}
 		bool isPremium() const {
 			return premium;
 		}

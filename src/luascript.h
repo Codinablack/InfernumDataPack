@@ -326,6 +326,7 @@ class LuaScriptInterface
 		static Position getPosition(lua_State* L, int32_t arg);
 		static Outfit_t getOutfit(lua_State* L, int32_t arg);
 		static LuaVariant getVariant(lua_State* L, int32_t arg);
+		static InstantSpell* getInstantSpell(lua_State* L, int32_t arg);
 
 		static Thing* getThing(lua_State* L, int32_t arg);
 		static Creature* getCreature(lua_State* L, int32_t arg);
@@ -986,6 +987,8 @@ class LuaScriptInterface
 
 		static int luaPlayerSetAttackSpeed(lua_State* L);
         static int luaPlayerGetAttackSpeed(lua_State* L);
+
+		static int luaPlayerCastSpell(lua_State* L);
 
 		// Monster
 		static int luaMonsterCreate(lua_State* L);

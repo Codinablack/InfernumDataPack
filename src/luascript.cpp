@@ -797,6 +797,13 @@ LuaVariant LuaScriptInterface::getVariant(lua_State* L, int32_t arg)
 	return var;
 }
 
+InstantSpell* LuaScriptInterface::getInstantSpell(lua_State* L, int32_t arg)
+{
+	InstantSpell* spell = g_spells->getInstantSpellByName(getFieldString(L, arg, "name"));
+	lua_pop(L, 1);
+	return spell;
+}
+
 Thing* LuaScriptInterface::getThing(lua_State* L, int32_t arg)
 {
 	Thing* thing;
@@ -884,7 +891,7 @@ void LuaScriptInterface::pushCombatDamage(lua_State* L, const CombatDamage& dama
 
 void LuaScriptInterface::pushInstantSpell(lua_State* L, const InstantSpell& spell)
 {
-	lua_createtable(L, 0, 6);
+	lua_createtable(L, 0, 8);
 
 	setField(L, "name", spell.getName());
 	setField(L, "words", spell.getWords());
@@ -892,6 +899,8 @@ void LuaScriptInterface::pushInstantSpell(lua_State* L, const InstantSpell& spel
 	setField(L, "mlevel", spell.getMagicLevel());
 	setField(L, "mana", spell.getMana());
 	setField(L, "manapercent", spell.getManaPercent());
+	setField(L, "cooldown", spell.getCooldown());
+	setField(L, "groupCooldown", spell.getGroupCooldown());
 
 	setMetatable(L, -1, "Spell");
 }
@@ -2359,6 +2368,8 @@ void LuaScriptInterface::registerFunctions()
 
 	registerMethod("Player", "getAttackSpeed", LuaScriptInterface::luaPlayerGetAttackSpeed);
     registerMethod("Player", "setAttackSpeed", LuaScriptInterface::luaPlayerSetAttackSpeed);
+
+	registerMethod("Player", "castSpell", LuaScriptInterface::luaPlayerCastSpell);
 
 	// Monster
 	registerClass("Monster", "Creature", LuaScriptInterface::luaMonsterCreate);
@@ -9585,7 +9596,7 @@ int LuaScriptInterface::luaPlayerCanCast(lua_State* L)
 {
 	// player:canCast(spell)
 	Player* player = getUserdata<Player>(L, 1);
-	InstantSpell* spell = getUserdata<InstantSpell>(L, 2);
+	InstantSpell* spell = getInstantSpell(L, 2);
 	if (player && spell) {
 		pushBoolean(L, spell->canCast(player));
 	} else {
@@ -9642,6 +9653,20 @@ int LuaScriptInterface::luaPlayerSetAttackSpeed(lua_State* L)
         lua_pushnil(L);
     }
     return 1;
+}
+
+int LuaScriptInterface::luaPlayerCastSpell(lua_State* L)
+{
+	// player:castSpell(spell, param)
+	Player* player = getUserdata<Player>(L, 1);
+	InstantSpell* spell = getInstantSpell(L, 2);
+	std::string param = getString(L, 3);
+	if (player && spell) {
+		pushBoolean(L, spell->playerCastInstant(player, param));
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
 }
  
 int LuaScriptInterface::luaPlayerGetAttackSpeed(lua_State* L)
@@ -12773,7 +12798,7 @@ int LuaScriptInterface::luaSpellCreate(lua_State* L)
 int LuaScriptInterface::luaSpellGetManaCost(lua_State* L)
 {
 	// spell:getManaCost(player)
-	InstantSpell* spell = getUserdata<InstantSpell>(L, 1);
+	InstantSpell* spell = getInstantSpell(L, 1);
 	Player* player = getUserdata<Player>(L, 2);
 	if (spell && player) {
 		lua_pushnumber(L, spell->getManaCost(player));
@@ -12786,7 +12811,7 @@ int LuaScriptInterface::luaSpellGetManaCost(lua_State* L)
 int LuaScriptInterface::luaSpellGetSoulCost(lua_State* L)
 {
 	// spell:getSoulCost()
-	if (InstantSpell* spell = getUserdata<InstantSpell>(L, 1)) {
+	if (InstantSpell* spell = getInstantSpell(L, 1)) {
 		lua_pushnumber(L, spell->getSoulCost());
 	} else {
 		lua_pushnil(L);
@@ -12797,7 +12822,7 @@ int LuaScriptInterface::luaSpellGetSoulCost(lua_State* L)
 int LuaScriptInterface::luaSpellIsPremium(lua_State* L)
 {
 	// spell:isPremium()
-	if (InstantSpell* spell = getUserdata<InstantSpell>(L, 1)) {
+	if (InstantSpell* spell = getInstantSpell(L, 1)) {
 		pushBoolean(L, spell->isPremium());
 	} else {
 		lua_pushnil(L);
@@ -12808,7 +12833,7 @@ int LuaScriptInterface::luaSpellIsPremium(lua_State* L)
 int LuaScriptInterface::luaSpellIsLearnable(lua_State* L)
 {
 	// spell:isLearnable()
-	if (InstantSpell* spell = getUserdata<InstantSpell>(L, 1)) {
+	if (InstantSpell* spell = getInstantSpell(L, 1)) {
 		pushBoolean(L, spell->isLearnable());
 	} else {
 		lua_pushnil(L);
