@@ -1162,7 +1162,7 @@ class LuaScriptInterface
 		static int luaItemTypeGetDefense(lua_State* L);
 		static int luaItemTypeGetExtraDefense(lua_State* L);
 		static int luaItemTypeGetArmor(lua_State* L);
-		static int luaItemTypeGetRegen(lua_State* L);
+		static int luaItemTypeGetHealing(lua_State* L);
 		static int luaItemTypeGetWeaponType(lua_State* L);
 
 		static int luaItemTypeGetElementType(lua_State* L);

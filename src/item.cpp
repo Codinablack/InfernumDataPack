@@ -67,18 +67,6 @@ Item* Item::CreateItem(const uint16_t type, uint16_t count /*= 0*/)
 			newItem = new Mailbox(type);
 		} else if (it.isBed()) {
 			newItem = new BedItem(type);
-		} else if (it.id >= 2210 && it.id <= 2212) {
-			newItem = new Item(type - 3, count);
-		} else if (it.id == 2215 || it.id == 2216) {
-			newItem = new Item(type - 2, count);
-		} else if (it.id >= 2202 && it.id <= 2206) {
-			newItem = new Item(type - 37, count);
-		} else if (it.id == 2640) {
-			newItem = new Item(6132, count);
-		} else if (it.id == 6301) {
-			newItem = new Item(6300, count);
-		} else if (it.id == 18528) {
-			newItem = new Item(18408, count);
 		} else {
 			newItem = new Item(type, count);
 		}
@@ -569,12 +557,12 @@ Attr_ReadValue Item::readAttr(AttrTypes_t attr, PropStream& propStream)
 			break;
 		}
 
-		case ATTR_BONUSREGEN: {
-			uint16_t bonusRegen;
-			if (!propStream.read<uint16_t>(bonusRegen)) {
+		case ATTR_BONUSHEALING: {
+			uint16_t bonusHealing;
+			if (!propStream.read<uint16_t>(bonusHealing)) {
 				return ATTR_READ_ERROR;
 			}
-			setIntAttr(ITEM_ATTRIBUTE_BONUSREGEN, bonusRegen);
+			setIntAttr(ITEM_ATTRIBUTE_BONUSHEALING, bonusHealing);
 			break;
 		}
 
@@ -783,9 +771,9 @@ void Item::serializeAttr(PropWriteStream& propWriteStream) const
 		propWriteStream.write<uint8_t>(getIntAttr(ITEM_ATTRIBUTE_SHOOTRANGE));
 	}
 
-	if (hasAttribute(ITEM_ATTRIBUTE_BONUSREGEN)) {
-		propWriteStream.write<uint16_t>(ATTR_BONUSREGEN);
-		propWriteStream.write<uint16_t>(getIntAttr(ITEM_ATTRIBUTE_BONUSREGEN));
+	if (hasAttribute(ITEM_ATTRIBUTE_BONUSHEALING)) {
+		propWriteStream.write<uint16_t>(ATTR_BONUSHEALING);
+		propWriteStream.write<uint16_t>(getIntAttr(ITEM_ATTRIBUTE_BONUSHEALING));
 	}
 
 	if (hasAttribute(ITEM_ATTRIBUTE_CUSTOM)) {
@@ -1245,9 +1233,9 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance,
 			}
 		}
 
-		uint16_t bonusRegen = item ? item->getRegen() : it.bonusRegen;
-		if (bonusRegen != 0) {
-			s << " (bonus regeneration: " << std::showpos << bonusRegen << std::noshowpos << "%)";
+		uint16_t bonusHealing = item ? item->getHealing() : it.bonusHealing;
+		if (bonusHealing!= 0) {
+			s << " (bonus healing: " << std::showpos << bonusHealing << std::noshowpos << "%)";
 		}
 
 		if (!begin) {

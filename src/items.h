@@ -99,7 +99,7 @@ enum ItemParseAttributes_t {
 	ITEM_PARSE_MAXHITCHANCE,
 	ITEM_PARSE_INVISIBLE,
 	ITEM_PARSE_SPEED,
-	ITEM_PARSE_BONUSREGEN,
+	ITEM_PARSE_BONUSHEALING,
 	ITEM_PARSE_HEALTHGAIN,
 	ITEM_PARSE_HEALTHTICKS,
 	ITEM_PARSE_MANAGAIN,
@@ -323,7 +323,7 @@ class ItemType
 		int32_t runeMagLevel = 0;
 		int32_t runeLevel = 0;
 
-		uint16_t bonusRegen = 0;
+		uint16_t bonusHealing = 0;
 
 		CombatType_t combatType = COMBAT_NONE;
 

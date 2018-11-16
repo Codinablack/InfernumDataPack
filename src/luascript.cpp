@@ -1449,7 +1449,7 @@ void LuaScriptInterface::registerFunctions()
 	registerEnum(ITEM_ATTRIBUTE_CHARGES)
 	registerEnum(ITEM_ATTRIBUTE_FLUIDTYPE)
 	registerEnum(ITEM_ATTRIBUTE_DOORID)
-	registerEnum(ITEM_ATTRIBUTE_BONUSREGEN)
+	registerEnum(ITEM_ATTRIBUTE_BONUSHEALING)
 
 	registerEnum(ITEM_TYPE_DEPOT)
 	registerEnum(ITEM_TYPE_MAILBOX)
@@ -2553,7 +2553,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("ItemType", "getDefense", LuaScriptInterface::luaItemTypeGetDefense);
 	registerMethod("ItemType", "getExtraDefense", LuaScriptInterface::luaItemTypeGetExtraDefense);
 	registerMethod("ItemType", "getArmor", LuaScriptInterface::luaItemTypeGetArmor);
-	registerMethod("ItemType", "getRegen", LuaScriptInterface::luaItemTypeGetRegen);
+	registerMethod("ItemType", "getHealing", LuaScriptInterface::luaItemTypeGetHealing);
 	registerMethod("ItemType", "getWeaponType", LuaScriptInterface::luaItemTypeGetWeaponType);
 
 	registerMethod("ItemType", "getElementType", LuaScriptInterface::luaItemTypeGetElementType);
@@ -11412,12 +11412,12 @@ int LuaScriptInterface::luaItemTypeGetArmor(lua_State* L)
 	return 1;
 }
 
-int LuaScriptInterface::luaItemTypeGetRegen(lua_State* L)
+int LuaScriptInterface::luaItemTypeGetHealing(lua_State* L)
 {
-	// itemType:getRegen()
+	// itemType:getHealing()
 	const ItemType* itemType = getUserdata<const ItemType>(L, 1);
 	if (itemType) {
-		lua_pushnumber(L, itemType->bonusRegen);
+		lua_pushnumber(L, itemType->bonusHealing);
 	} else {
 		lua_pushnil(L);
 	}

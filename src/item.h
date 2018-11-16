@@ -103,7 +103,7 @@ enum AttrTypes_t {
 	ATTR_HITCHANCE = 32,
 	ATTR_SHOOTRANGE = 33,
 	ATTR_CUSTOM_ATTRIBUTES = 34,
-	ATTR_BONUSREGEN = 35,
+	ATTR_BONUSHEALING = 35,
 };
 
 enum Attr_ReadValue {
@@ -824,11 +824,11 @@ class Item : virtual public Thing
 			}
 			return items[id].armor;
 		}
-		uint16_t getRegen() const {
-			if (hasAttribute(ITEM_ATTRIBUTE_BONUSREGEN)) {
-				return getIntAttr(ITEM_ATTRIBUTE_BONUSREGEN);
+		uint16_t getHealing() const {
+			if (hasAttribute(ITEM_ATTRIBUTE_BONUSHEALING)) {
+				return getIntAttr(ITEM_ATTRIBUTE_BONUSHEALING);
 			}
-			return items[id].bonusRegen;
+			return items[id].bonusHealing;
 		}
 		int32_t getDefense() const {
 			if (hasAttribute(ITEM_ATTRIBUTE_DEFENSE)) {

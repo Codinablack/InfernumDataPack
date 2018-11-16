@@ -74,7 +74,7 @@ const std::unordered_map<std::string, ItemParseAttributes_t> ItemParseAttributes
 	{"maxhitchance", ITEM_PARSE_MAXHITCHANCE},
 	{"invisible", ITEM_PARSE_INVISIBLE},
 	{"speed", ITEM_PARSE_SPEED},
-	{"bonusregen", ITEM_PARSE_BONUSREGEN},
+	{"bonushealing", ITEM_PARSE_BONUSHEALING},
 	{"healthgain", ITEM_PARSE_HEALTHGAIN},
 	{"healthticks", ITEM_PARSE_HEALTHTICKS},
 	{"managain", ITEM_PARSE_MANAGAIN},
@@ -865,8 +865,8 @@ void Items::parseItemNode(const pugi::xml_node& itemNode, uint16_t id)
 					break;
 				}
 
-				case ITEM_PARSE_BONUSREGEN: {
-					it.bonusRegen = pugi::cast<uint16_t>(valueAttribute.value());
+				case ITEM_PARSE_BONUSHEALING: {
+					it.bonusHealing = pugi::cast<uint16_t>(valueAttribute.value());
 				}
 
 				case ITEM_PARSE_HEALTHGAIN: {
