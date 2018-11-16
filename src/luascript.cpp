@@ -4199,8 +4199,8 @@ int LuaScriptInterface::luaGameCreateContainer(lua_State* L)
 
 int LuaScriptInterface::luaGameCreateMonster(lua_State* L)
 {
-   // Game.createMonster(monsterName, position[, extended = false[, force = false]])
-   Monster* monster = Monster::createMonster(getString(L, 1));
+   // Game.createMonster(monsterName, position[, extended = false[, force = false[, level = 0]]])
+   Monster* monster = Monster::createMonster(getString(L, 1), getNumber<uint32_t>(L, 5, 0));
    if (!monster) {
        lua_pushnil(L);
        return 1;

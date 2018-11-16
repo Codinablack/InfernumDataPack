@@ -40,11 +40,11 @@ enum TargetSearchType_t {
 class Monster final : public Creature
 {
 	public:
-		static Monster* createMonster(const std::string& name);
+		static Monster* createMonster(const std::string& name, uint32_t level = 0);
 		static int32_t despawnRange;
 		static int32_t despawnRadius;
 
-		explicit Monster(MonsterType* mType);
+		explicit Monster(MonsterType* mType, uint32_t forceLevel = 0);
 		~Monster();
 
 		// non-copyable

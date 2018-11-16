@@ -33,16 +33,16 @@ int32_t Monster::despawnRadius;
 
 uint32_t Monster::monsterAutoID = 0x40000000;
 
-Monster* Monster::createMonster(const std::string& name)
+Monster* Monster::createMonster(const std::string& name, uint32_t level)
 {
 	MonsterType* mType = g_monsters.getMonsterType(name);
 	if (!mType) {
 		return nullptr;
 	}
-	return new Monster(mType);
+	return new Monster(mType, level);
 }
 
-Monster::Monster(MonsterType* mType) :
+Monster::Monster(MonsterType* mType, uint32_t forceLevel) :
 	Creature(),
 	strDescription(mType->nameDescription),
 	mType(mType)
@@ -50,7 +50,7 @@ Monster::Monster(MonsterType* mType) :
 	defaultOutfit = mType->info.outfit;
 	currentOutfit = mType->info.outfit;
 	skull = mType->info.skull;
-	level = uniform_random(mType->info.minLevel, mType->info.maxLevel);
+	level = (forceLevel != 0) ? forceLevel : uniform_random(mType->info.minLevel, mType->info.maxLevel);
 	health = mType->info.health;
 	healthMax = mType->info.healthMax;
 	baseSpeed = mType->info.baseSpeed;
