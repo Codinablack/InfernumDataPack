@@ -74,7 +74,10 @@ class Monster final : public Creature
 			return mType->nameDescription;
 		}
 		std::string getDescription(int32_t) const override {
-			return strDescription + ", it is level " + std::to_string(level) + '.';
+			if (level > 0) {
+				return strDescription + ", it is level " + std::to_string(level) + '.';
+			}
+			return strDescription;
 		}
 
 		CreatureType_t getType() const override {
