@@ -82,6 +82,13 @@ bool booleanString(const std::string& str);
 
 std::string getWeaponName(WeaponType_t weaponType);
 
+itemAbilityTypes combatToAbsorb(CombatType_t combatType);
+itemAbilityTypes combatToFieldAbsorb(CombatType_t combatType);
+itemAbilityTypes skillToAbility(uint8_t skillid);
+itemAbilityTypes specialSkillToAbility(uint8_t skillid);
+itemAbilityTypes statToAbility(uint8_t statid);
+itemAbilityTypes statToAbilityPercent(uint8_t statid);
+
 size_t combatTypeToIndex(CombatType_t combatType);
 CombatType_t indexToCombatType(size_t v);
 

@@ -377,7 +377,8 @@ void Weapon::internalUseWeapon(Player* player, Item* item, Creature* target, int
 		}
 		damage.primary.type = params.combatType;
 		damage.primary.value = (getWeaponDamage(player, target, item) * damageModifier) / 100;
-		damage.secondary.type = getElementType();
+		CombatType_t customType = static_cast<CombatType_t>(item->getAbilityInt(ITEM_ABILITY_ELEMENTTYPE));
+		damage.secondary.type = customType != COMBAT_NONE ? customType : getElementType();
 		damage.secondary.value = getElementDamage(player, target, item);
 		Combat::doCombatHealth(player, target, damage, params);
 	}
@@ -561,7 +562,7 @@ bool WeaponMelee::getSkillType(const Player* player, const Item* item,
 
 int32_t WeaponMelee::getElementDamage(const Player* player, const Creature*, const Item* item) const
 {
-	if (elementType == COMBAT_NONE) {
+	if (elementType == COMBAT_NONE && item->getAbilityInt(ITEM_ABILITY_ELEMENTTYPE) == COMBAT_NONE) {
 		return 0;
 	}
 
@@ -576,7 +577,8 @@ int32_t WeaponMelee::getElementDamage(const Player* player, const Creature*, con
 int32_t WeaponMelee::getWeaponDamage(const Player* player, const Creature*, const Item* item, bool maxDamage /*= false*/) const
 {
 	int32_t attackSkill = player->getWeaponSkill(item);
-	int32_t attackValue = std::max<int32_t>(0, item->getAttack());
+	uint64_t value = item->getAbilityInt(ITEM_ABILITY_ELEMENTDAMAGE);
+	int32_t attackValue = value != 0 ? value : elementDamage;
 	float attackFactor = player->getAttackFactor();
 
 	int32_t maxValue = static_cast<int32_t>(Weapons::getMaxWeaponDamage(player->getLevel(), attackSkill, attackValue, attackFactor) * player->getVocation()->meleeDamageMultiplier);

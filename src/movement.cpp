@@ -578,95 +578,13 @@ uint32_t EquipItem(MoveEvent* moveEvent, Player* player, Item* item, slots_t slo
 
 	const ItemType& it = Item::items[item->getID()];
 	if (it.transformEquipTo != 0) {
+		if (item->hasAbilities() || it.abilities) {
+			player->updateAbilityConditions(item, slot, true);
+		}
 		Item* newItem = g_game.transformItem(item, it.transformEquipTo);
 		g_game.startDecay(newItem);
 	} else {
-		player->setItemAbility(slot, true);
-	}
-
-	if (!it.abilities) {
-		return 1;
-	}
-
-	if (it.abilities->invisible) {
-		Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_INVISIBLE, -1, 0);
-		player->addCondition(condition);
-	}
-
-	if (it.abilities->manaShield) {
-		Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_MANASHIELD, -1, 0);
-		player->addCondition(condition);
-	}
-
-	if (it.abilities->speed != 0) {
-		g_game.changeSpeed(player, it.abilities->speed);
-	}
-
-	if (it.abilities->conditionSuppressions != 0) {
-		player->addConditionSuppressions(it.abilities->conditionSuppressions);
-		player->sendIcons();
-	}
-
-	if (it.abilities->regeneration) {
-		Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_REGENERATION, -1, 0);
-
-		if (it.abilities->healthGain != 0) {
-			condition->setParam(CONDITION_PARAM_HEALTHGAIN, it.abilities->healthGain);
-		}
-
-		if (it.abilities->healthTicks != 0) {
-			condition->setParam(CONDITION_PARAM_HEALTHTICKS, it.abilities->healthTicks);
-		}
-
-		if (it.abilities->manaGain != 0) {
-			condition->setParam(CONDITION_PARAM_MANAGAIN, it.abilities->manaGain);
-		}
-
-		if (it.abilities->manaTicks != 0) {
-			condition->setParam(CONDITION_PARAM_MANATICKS, it.abilities->manaTicks);
-		}
-
-		player->addCondition(condition);
-	}
-
-	//skill modifiers
-	bool needUpdateSkills = false;
-
-	for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i) {
-		if (it.abilities->skills[i]) {
-			needUpdateSkills = true;
-			player->setVarSkill(static_cast<skills_t>(i), it.abilities->skills[i]);
-		}
-	}
-
-	for (int32_t i = SPECIALSKILL_FIRST; i <= SPECIALSKILL_LAST; ++i) {
-		if (it.abilities->specialSkills[i]) {
-			needUpdateSkills = true;
-			player->setVarSpecialSkill(static_cast<SpecialSkills_t>(i), it.abilities->specialSkills[i]);
-		}
-	}
-
-	if (needUpdateSkills) {
-		player->sendSkills();
-	}
-
-	//stat modifiers
-	bool needUpdateStats = false;
-
-	for (int32_t s = STAT_FIRST; s <= STAT_LAST; ++s) {
-		if (it.abilities->stats[s]) {
-			needUpdateStats = true;
-			player->setVarStats(static_cast<stats_t>(s), it.abilities->stats[s]);
-		}
-
-		if (it.abilities->statsPercent[s]) {
-			needUpdateStats = true;
-			player->setVarStats(static_cast<stats_t>(s), static_cast<int32_t>(player->getDefaultStats(static_cast<stats_t>(s)) * ((it.abilities->statsPercent[s] - 100) / 100.f)));
-		}
-	}
-
-	if (needUpdateStats) {
-		player->sendStats();
+		player->updateAbilityConditions(item, slot, true);
 	}
 
 	return 1;
@@ -686,73 +604,11 @@ uint32_t DeEquipItem(MoveEvent*, Player* player, Item* item, slots_t slot, bool)
 		g_game.startDecay(item);
 	}
 
-	if (!it.abilities) {
-		return 1;
-	}
-
-	if (it.abilities->invisible) {
-		player->removeCondition(CONDITION_INVISIBLE, static_cast<ConditionId_t>(slot));
-	}
-
-	if (it.abilities->manaShield) {
-		player->removeCondition(CONDITION_MANASHIELD, static_cast<ConditionId_t>(slot));
-	}
-
-	if (it.abilities->speed != 0) {
-		g_game.changeSpeed(player, -it.abilities->speed);
-	}
-
-	if (it.abilities->conditionSuppressions != 0) {
-		player->removeConditionSuppressions(it.abilities->conditionSuppressions);
-		player->sendIcons();
-	}
-
-	if (it.abilities->regeneration) {
-		player->removeCondition(CONDITION_REGENERATION, static_cast<ConditionId_t>(slot));
-	}
-
-	//skill modifiers
-	bool needUpdateSkills = false;
-
-	for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; ++i) {
-		if (it.abilities->skills[i] != 0) {
-			needUpdateSkills = true;
-			player->setVarSkill(static_cast<skills_t>(i), -it.abilities->skills[i]);
-		}
-	}
-
-	for (int32_t i = SPECIALSKILL_FIRST; i <= SPECIALSKILL_LAST; ++i) {
-		if (it.abilities->specialSkills[i] != 0) {
-			needUpdateSkills = true;
-			player->setVarSpecialSkill(static_cast<SpecialSkills_t>(i), -it.abilities->specialSkills[i]);
-		}
-	}
-
-	if (needUpdateSkills) {
-		player->sendSkills();
-	}
-
-	//stat modifiers
-	bool needUpdateStats = false;
-
-	for (int32_t s = STAT_FIRST; s <= STAT_LAST; ++s) {
-		if (it.abilities->stats[s]) {
-			needUpdateStats = true;
-			player->setVarStats(static_cast<stats_t>(s), -it.abilities->stats[s]);
-		}
-
-		if (it.abilities->statsPercent[s]) {
-			needUpdateStats = true;
-			player->setVarStats(static_cast<stats_t>(s), -static_cast<int32_t>(player->getDefaultStats(static_cast<stats_t>(s)) * ((it.abilities->statsPercent[s] - 100) / 100.f)));
-		}
-	}
-
-	if (needUpdateStats) {
-		player->sendStats();
-	}
+	player->updateAbilityConditions(item, slot, false);
 
 	return 1;
 }
+
 
 }
 

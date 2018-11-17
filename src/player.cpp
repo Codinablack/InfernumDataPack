@@ -516,6 +516,30 @@ void Player::setVarStats(stats_t stat, int32_t modifier)
 	}
 }
 
+void Player::setVarStatsPercent(stats_t stat, int32_t modifier)
+{
+	varStatsPercent[stat] += modifier;
+	switch (stat) {
+		case STAT_MAXHITPOINTS: {
+			if (getHealth() > getMaxHealth()) {
+				Creature::changeHealth(getMaxHealth() - getHealth());
+			} else {
+				g_game.addCreatureHealth(this);
+			}
+			break;
+		}
+ 		case STAT_MAXMANAPOINTS: {
+			if (getMana() > getMaxMana()) {
+				changeMana(getMaxMana() - getMana());
+			}
+			break;
+		}
+ 		default: {
+			break;
+		}
+	}
+}
+
 int32_t Player::getDefaultStats(stats_t stat) const
 {
 	switch (stat) {
@@ -1831,7 +1855,7 @@ BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_
 		}
 
 		const ItemType& it = Item::items[item->getID()];
-		if (!it.abilities) {
+		if (!item->getAbilities() && !it.abilities) {
 			if (damage <= 0) {
 				damage = 0;
 				return BLOCK_ARMOR;
@@ -1840,7 +1864,7 @@ BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_
 			continue;
 		}
 
-		const int16_t& absorbPercent = it.abilities->absorbPercent[combatTypeToIndex(combatType)];
+		const int16_t& absorbPercent = item->getAbilityValue(combatToAbsorb(combatType));
 		if (absorbPercent != 0) {
 			damage -= std::round(damage * (absorbPercent / 100.));
 
@@ -1851,7 +1875,7 @@ BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_
 		}
 
 		if (field) {
-			const int16_t& fieldAbsorbPercent = it.abilities->fieldAbsorbPercent[combatTypeToIndex(combatType)];
+			const int16_t& fieldAbsorbPercent = item->getAbilityValue(combatToFieldAbsorb(combatType));
 			if (fieldAbsorbPercent != 0) {
 				damage -= std::round(damage * (fieldAbsorbPercent / 100.));
 
@@ -3983,6 +4007,143 @@ PartyShields_t Player::getPartyShield(const Player* player) const
 	}
 
 	return SHIELD_NONE;
+}
+
+void Player::updateAbilityConditions(Item* item, slots_t slot, bool equip)
+{
+	setItemAbility(slot, equip);
+	const ItemType& itemType = Item::items[item->getID()];
+	if (!item->getAbilities() && !itemType.abilities) {
+		return;
+	}
+ 	bool needUpdateSkills = false;
+ 	for (int32_t i = STAT_FIRST; i <= SKILL_LAST; i++) {
+		itemAbilityTypes type = skillToAbility(i);
+		if (type == ITEM_ABILITY_NONE) {
+			continue;
+		}
+		int64_t value = item->getAbilityValue(type);
+		if (value == 0) {
+			continue;
+		}
+		setVarSkill(static_cast<skills_t>(i), equip ? value : -value);
+		needUpdateSkills = true;
+	}
+ 	for (int32_t i = 0; i <= SPECIALSKILL_LAST; i++) {
+		itemAbilityTypes type = specialSkillToAbility(i);
+		if (type == ITEM_ABILITY_NONE) {
+			continue;
+		}
+		int64_t value = item->getAbilityValue(type);
+		if (value == 0) {
+			continue;
+		}
+		setVarSpecialSkill(static_cast<SpecialSkills_t>(i), equip ? value : -value);
+		needUpdateSkills = true;
+	}
+ 	if (needUpdateSkills) {
+		sendSkills();
+	}
+ 	bool needUpdateStats = false;
+ 	for (int32_t s = STAT_FIRST; s <= STAT_LAST; ++s) {
+		itemAbilityTypes type = statToAbility(s);
+		if (type == ITEM_ABILITY_NONE) {
+			continue;
+		}
+		int64_t value = item->getAbilityValue(type);
+		if (value == 0) {
+			continue;
+		}
+		setVarStats(static_cast<stats_t>(s), equip ? value : -value);
+		needUpdateStats = true;
+	}
+ 	for (int32_t i = STAT_FIRST; i <= SKILL_LAST; i++) {
+		itemAbilityTypes type = statToAbilityPercent(i);
+		if (type == ITEM_ABILITY_NONE) {
+			continue;
+		}
+		int64_t value = item->getAbilityValue(type);
+		if (value == 0) {
+			continue;
+		}
+		switch (i) {
+			case STAT_MAXHITPOINTS: {
+				int32_t change = static_cast<int32_t>(healthMax * (value / 100.f));
+				setVarStatsPercent(static_cast<stats_t>(i), equip ? change : -change);
+				break;
+			}
+ 			case STAT_MAXMANAPOINTS: {
+				int32_t change = static_cast<int32_t>(manaMax * (value / 100.f));
+				setVarStatsPercent(static_cast<stats_t>(i), equip ? change : -change);
+				break;
+			}
+ 			case STAT_MAGICPOINTS: {
+				int32_t change = static_cast<int32_t>(magLevel * (value / 100.f));
+				setVarStatsPercent(static_cast<stats_t>(i), equip ? change : -change);
+				break;
+			}
+		}
+		needUpdateStats = true;
+	}
+ 	if (needUpdateStats) {
+		sendStats();
+	}
+ 	bool invisible = item->getAbilityValue(ITEM_ABILITY_INVISIBLE);
+	if (invisible) {
+		if (equip) {
+			Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_INVISIBLE, -1, 0);
+			addCondition(condition);
+		} else {
+			removeCondition(CONDITION_INVISIBLE, static_cast<ConditionId_t>(slot));
+		}
+	}
+ 	bool manaShield = item->getAbilityValue(ITEM_ABILITY_MANASHIELD);
+	if (manaShield) {
+		if (equip) {
+			Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_MANASHIELD, -1, 0);
+			addCondition(condition);
+		} else {
+			removeCondition(CONDITION_MANASHIELD, static_cast<ConditionId_t>(slot));
+		}
+	}
+ 	int32_t speed = item->getAbilityValue(ITEM_ABILITY_SPEED);
+	if (speed != 0) {
+		g_game.changeSpeed(this, equip ? speed : -speed);
+	}
+ 	uint32_t conditionSuppressions = item->getAbilityValue(ITEM_ABILITY_CONDITIONSUPPRESSIONS);
+	if (conditionSuppressions != 0) {
+		if (equip) {
+			addConditionSuppressions(conditionSuppressions);
+		} else {
+			removeConditionSuppressions(conditionSuppressions);
+		}
+		sendIcons();
+	}
+ 	bool regeneration = item->getAbilityValue(ITEM_ABILITY_REGENERATION);
+	if (regeneration) {
+		if (!equip) {
+			removeCondition(CONDITION_REGENERATION, static_cast<ConditionId_t>(slot));
+		} else {
+			Condition* condition = Condition::createCondition(static_cast<ConditionId_t>(slot), CONDITION_REGENERATION, -1, 0);
+ 			uint32_t healthGain = item->getAbilityValue(ITEM_ABILITY_HEALTHGAIN);
+			if (healthGain != 0) {
+				condition->setParam(CONDITION_PARAM_HEALTHGAIN, healthGain);
+			}
+ 			uint32_t healthTicks = item->getAbilityValue(ITEM_ABILITY_HEALTHTICKS);
+			if (healthTicks != 0) {
+				condition->setParam(CONDITION_PARAM_HEALTHTICKS, healthTicks);
+			}
+ 			uint32_t manaGain = item->getAbilityValue(ITEM_ABILITY_MANAGAIN);
+			if (manaGain != 0) {
+				condition->setParam(CONDITION_PARAM_MANAGAIN, manaGain);
+			}
+ 			uint32_t manaTicks = item->getAbilityValue(ITEM_ABILITY_MANATICKS);
+			if (manaTicks != 0) {
+				condition->setParam(CONDITION_PARAM_MANATICKS, manaTicks);
+			}
+ 			addCondition(condition);
+		}
+	}
 }
 
 bool Player::isInviting(const Player* player) const

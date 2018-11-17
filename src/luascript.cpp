@@ -1451,6 +1451,54 @@ void LuaScriptInterface::registerFunctions()
 	registerEnum(ITEM_ATTRIBUTE_DOORID)
 	registerEnum(ITEM_ATTRIBUTE_BONUSHEALING)
 
+	registerEnum(ITEM_ABILITY_NONE)
+	registerEnum(ITEM_ABILITY_HEALTHGAIN)
+	registerEnum(ITEM_ABILITY_HEALTHTICKS)
+	registerEnum(ITEM_ABILITY_MANAGAIN)
+	registerEnum(ITEM_ABILITY_MANATICKS)
+	registerEnum(ITEM_ABILITY_CONDITIONSUPPRESSIONS)
+	registerEnum(ITEM_ABILITY_MAXHITPOINTS)
+	registerEnum(ITEM_ABILITY_MAXMANAPOINTS)
+	registerEnum(ITEM_ABILITY_MAGICPOINTS)
+	registerEnum(ITEM_ABILITY_MAXHITPOINTSPERCENT)
+	registerEnum(ITEM_ABILITY_MAXMANAPOINTSPERCENT)
+	registerEnum(ITEM_ABILITY_MAGICPOINTSPERCENT)
+	registerEnum(ITEM_ABILITY_CRITICALHITCHANCE)
+	registerEnum(ITEM_ABILITY_CRITICALHITAMOUNT)
+	registerEnum(ITEM_ABILITY_LIFELEECHCHANCE)
+	registerEnum(ITEM_ABILITY_LIFELEECHAMOUNT)
+	registerEnum(ITEM_ABILITY_MANALEECHCHANCE)
+	registerEnum(ITEM_ABILITY_MANALEECHAMOUNT)
+	registerEnum(ITEM_ABILITY_SKILLFIST)
+	registerEnum(ITEM_ABILITY_SKILLCLUB)
+	registerEnum(ITEM_ABILITY_SKILLSWORD)
+	registerEnum(ITEM_ABILITY_SKILLAXE)
+	registerEnum(ITEM_ABILITY_SKILLDISTANCE)
+	registerEnum(ITEM_ABILITY_SKILLSHIELD)
+	registerEnum(ITEM_ABILITY_SKILLFISHING)
+	registerEnum(ITEM_ABILITY_SPEED)
+	registerEnum(ITEM_ABILITY_ABSORBPHYSICAL)
+	registerEnum(ITEM_ABILITY_ABSORBENERGY)
+	registerEnum(ITEM_ABILITY_ABSORBEARTH)
+	registerEnum(ITEM_ABILITY_ABSORBFIRE)
+	registerEnum(ITEM_ABILITY_ABSORBWATER)
+	registerEnum(ITEM_ABILITY_ABSORBICE)
+	registerEnum(ITEM_ABILITY_ABSORBHOLY)
+	registerEnum(ITEM_ABILITY_ABSORBDEATH)
+	registerEnum(ITEM_ABILITY_FIELDABSORBPHYSICAL)
+	registerEnum(ITEM_ABILITY_FIELDABSORBENERGY)
+	registerEnum(ITEM_ABILITY_FIELDABSORBEARTH)
+	registerEnum(ITEM_ABILITY_FIELDABSORBFIRE)
+	registerEnum(ITEM_ABILITY_FIELDABSORBWATER)
+	registerEnum(ITEM_ABILITY_FIELDABSORBICE)
+	registerEnum(ITEM_ABILITY_FIELDABSORBHOLY)
+	registerEnum(ITEM_ABILITY_FIELDABSORBDEATH)
+	registerEnum(ITEM_ABILITY_ELEMENTTYPE)
+	registerEnum(ITEM_ABILITY_ELEMENTDAMAGE)
+	registerEnum(ITEM_ABILITY_MANASHIELD)
+	registerEnum(ITEM_ABILITY_INVISIBLE)
+	registerEnum(ITEM_ABILITY_REGENERATION)
+
 	registerEnum(ITEM_TYPE_DEPOT)
 	registerEnum(ITEM_TYPE_MAILBOX)
 	registerEnum(ITEM_TYPE_TRASHHOLDER)
@@ -2085,6 +2133,9 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Item", "getAttribute", LuaScriptInterface::luaItemGetAttribute);
 	registerMethod("Item", "setAttribute", LuaScriptInterface::luaItemSetAttribute);
 	registerMethod("Item", "removeAttribute", LuaScriptInterface::luaItemRemoveAttribute);
+	registerMethod("Item", "getAbility", LuaScriptInterface::luaItemGetAbility);
+	registerMethod("Item", "setAbility", LuaScriptInterface::luaItemSetAbility);
+	registerMethod("Item", "removeAbility", LuaScriptInterface::luaItemRemoveAbility);
 	registerMethod("Item", "getCustomAttribute", LuaScriptInterface::luaItemGetCustomAttribute);
 	registerMethod("Item", "setCustomAttribute", LuaScriptInterface::luaItemSetCustomAttribute);
 	registerMethod("Item", "removeCustomAttribute", LuaScriptInterface::luaItemRemoveCustomAttribute);
@@ -6125,6 +6176,66 @@ int LuaScriptInterface::luaItemSetAttribute(lua_State* L)
 		pushBoolean(L, true);
 	} else {
 		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaItemGetAbility(lua_State* L)
+{
+	// item:getAbility(key)
+	Item* item = getUserdata<Item>(L, 1);
+	if (!item) {
+		lua_pushnil(L);
+		return 1;
+	}
+ 	itemAbilityTypes ability;
+	if (isNumber(L, 2)) {
+		ability = getNumber<itemAbilityTypes>(L, 2);
+	} else {
+		ability = ITEM_ABILITY_NONE;
+	}
+ 	if (ItemAbilities::isAbility(ability)) {
+		lua_pushnumber(L, item->getAbilityInt(ability));
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+ int LuaScriptInterface::luaItemSetAbility(lua_State* L)
+{
+	// item:setAbility(key, value)
+	Item* item = getUserdata<Item>(L, 1);
+	if (!item) {
+		lua_pushnil(L);
+		return 1;
+	}
+ 	itemAbilityTypes ability;
+	if (isNumber(L, 2)) {
+		ability = getNumber<itemAbilityTypes>(L, 2);
+	} else {
+		ability = ITEM_ABILITY_NONE;
+	}
+ 	if (ItemAbilities::isAbility(ability)) {
+		item->setAbilityInt(ability, getNumber<int64_t>(L, 3));
+		pushBoolean(L, true);
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+ int LuaScriptInterface::luaItemRemoveAbility(lua_State* L)
+{
+	// item:removeAbility(key)
+	Item* item = getUserdata<Item>(L, 1);
+	if (!item) {
+		lua_pushnil(L);
+	}
+	itemAbilityTypes type = getNumber<itemAbilityTypes>(L, 2);
+	if (type != ITEM_ABILITY_NONE) {
+		item->removeAbility(type);
+		lua_pushboolean(L, true);
+	} else {
+		lua_pushboolean(L, false);
 	}
 	return 1;
 }

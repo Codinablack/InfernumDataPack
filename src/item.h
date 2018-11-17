@@ -106,6 +106,123 @@ enum AttrTypes_t {
 	ATTR_BONUSHEALING = 35,
 };
 
+enum AbilityTypes_t {
+	ABILITY_HEALTHGAIN = 1,
+	ABILITY_HEALTHTICKS = 2,
+	ABILITY_MANAGAIN = 3,
+	ABILITY_MANATICKS = 4,
+	ABILITY_CONDITIONSUPPRESSIONS = 5,
+	ABILITY_MAXHITPOINTS = 6,
+	ABILITY_MAXMANAPOINTS = 7,
+	ABILITY_MAGICPOINTS = 8,
+	ABILITY_MAXHITPOINTSPERCENT = 9,
+	ABILITY_MAXMANAPOINTSPERCENT = 10,
+	ABILITY_MAGICPOINTSPERCENT = 11,
+	ABILITY_SKILLFIST = 12,
+	ABILITY_SKILLCLUB = 13,
+	ABILITY_SKILLSWORD = 14,
+	ABILITY_SKILLAXE = 15,
+	ABILITY_SKILLDISTANCE = 16,
+	ABILITY_SKILLSHIELD = 17,
+	ABILITY_SKILLFISHING = 18,
+	ABILITY_CRITICALHITCHANCE = 19,
+	ABILITY_CRITICALHITAMOUNT = 20,
+	ABILITY_LIFELEECHCHANCE = 21,
+	ABILITY_LIFELEECHAMOUNT = 22,
+	ABILITY_MANALEECHCHANCE = 23,
+	ABILITY_MANALEECHAMOUNT = 24,
+	ABILITY_SPEED = 25,
+	ABILITY_ABSORBPHYSICAL = 26,
+	ABILITY_ABSORBENERGY = 27,
+	ABILITY_ABSORBEARTH = 28,
+	ABILITY_ABSORBFIRE = 29,
+	ABILITY_ABSORBWATER = 30,
+	ABILITY_ABSORBICE = 31,
+	ABILITY_ABSORBHOLY = 32,
+	ABILITY_ABSORBDEATH = 33,
+	ABILITY_FIELDABSORBPHYSICAL = 34,
+	ABILITY_FIELDABSORBENERGY = 35,
+	ABILITY_FIELDABSORBEARTH = 36,
+	ABILITY_FIELDABSORBFIRE = 37,
+	ABILITY_FIELDABSORBWATER = 38,
+	ABILITY_FIELDABSORBICE = 39,
+	ABILITY_FIELDABSORBHOLY = 40,
+	ABILITY_FIELDABSORBDEATH = 41,
+	ABILITY_ELEMENTTYPE = 42,
+	ABILITY_ELEMENTDAMAGE = 43,
+	ABILITY_MANASHIELD = 44,
+	ABILITY_INVISIBLE = 45,
+	ABILITY_REGENERATION = 46,
+ 	ABILITY_START = ABILITY_HEALTHGAIN,
+	ABILITY_END = ABILITY_REGENERATION
+};
+ enum Ability_ReadValue {
+	ABILITY_READ_CONTINUE,
+	ABILITY_READ_ERROR,
+	ABILITY_READ_END
+};
+ class ItemAbilities
+{
+	private:
+		ItemAbilities() = default;
+		struct Ability
+		{
+			int64_t integer;
+			itemAbilityTypes type;
+ 			explicit Ability(itemAbilityTypes type) : integer(0), type(type) {}
+			Ability(const Ability& i) {
+				type = i.type;
+				if (ItemAbilities::isAbility(type)) {
+					integer = i.integer;
+				}
+			}
+			Ability(Ability&& attribute) : integer(attribute.integer), type(attribute.type) {
+				attribute.type = ITEM_ABILITY_NONE;
+			}
+			~Ability() { }
+			Ability& operator=(Ability other) {
+				Ability::swap(*this, other);
+				return *this;
+			}
+			Ability& operator=(Ability&& other) {
+				if (this != &other) {
+					integer = other.integer;
+					type = other.type;
+ 					other.type = ITEM_ABILITY_NONE;
+				}
+				return *this;
+			}
+ 			static void swap(Ability& first, Ability& second) {
+				std::swap(first.integer, second.integer);
+				std::swap(first.type, second.type);
+			}
+		};
+ 		std::forward_list<Ability> abilityList;
+		uint64_t abilityBits = 0;
+ 		int64_t getAbilityInt(itemAbilityTypes type) const {
+			const Ability* ability = getExistingAbility(type);
+			if (!ability) {
+				return 0;
+			}
+			return ability->integer;
+		}
+		void setAbilityInt(itemAbilityTypes type, int64_t value);
+		bool hasAbility(itemAbilityTypes type) const {
+			return (type & abilityBits) != 0;
+		}
+		void removeAbility(itemAbilityTypes type);
+ 		const Ability* getExistingAbility(itemAbilityTypes type) const;
+		Ability& getAbility(itemAbilityTypes type);
+ 	public:
+		static bool isAbility(itemAbilityTypes type) {
+			return (type & 0x3fffffffffff) != 0;
+		}
+ 		const std::forward_list<Ability>& getAbilities() const {
+			return abilityList;
+		}
+ 	friend class Item;
+};
+
 enum Attr_ReadValue {
 	ATTR_READ_CONTINUE,
 	ATTR_READ_ERROR,
@@ -578,6 +695,17 @@ class Item : virtual public Thing
 			return nullptr;
 		}
 
+		int64_t getAbilityInt(itemAbilityTypes type) const {
+			if (!abilities) {
+				return 0;
+			}
+			return abilities->getAbilityInt(type);
+		}
+ 		int64_t getAbilityValue(itemAbilityTypes type) const;
+ 		void setAbilityInt(itemAbilityTypes type, int64_t value) {
+			getAbilities()->setAbilityInt(type, value);
+		}
+
 		const std::string& getStrAttr(itemAttrTypes type) const {
 			if (!attributes) {
 				return ItemAttributes::emptyString;
@@ -611,6 +739,21 @@ class Item : virtual public Thing
 				return false;
 			}
 			return attributes->hasAttribute(type);
+		}
+
+		bool hasAbility(itemAbilityTypes type) const {
+			if (!abilities) {
+				return false;
+			}
+			return abilities->hasAbility(type);
+		}
+		void removeAbility(itemAbilityTypes type) {
+			if (abilities) {
+				abilities->removeAbility(type);
+			}
+		}
+		bool hasAbilities() {
+			return abilities ? abilities->abilityBits != 0 : false;
 		}
 
 		template<typename R>
@@ -771,8 +914,11 @@ class Item : virtual public Thing
 		virtual Attr_ReadValue readAttr(AttrTypes_t attr, PropStream& propStream);
 		bool unserializeAttr(PropStream& propStream);
 		virtual bool unserializeItemNode(OTB::Loader&, const OTB::Node&, PropStream& propStream);
+		virtual Ability_ReadValue readAbility(AbilityTypes_t abil, PropStream& propStream);
+		bool unserializeAbility(PropStream& propStream);
 
 		virtual void serializeAttr(PropWriteStream& propWriteStream) const;
+		virtual void serializeAbility(PropWriteStream& propWriteStream) const;
 
 		bool isPushable() const override final {
 			return isMoveable();
@@ -973,6 +1119,13 @@ class Item : virtual public Thing
 			return attributes;
 		}
 
+		std::unique_ptr<ItemAbilities>& getAbilities() {
+			if (!abilities) {
+				abilities.reset(new ItemAbilities());
+			}
+			return abilities;
+		}
+
 		void incrementReferenceCounter() {
 			++referenceCounter;
 		}
@@ -1005,6 +1158,7 @@ class Item : virtual public Thing
 		std::string getWeightDescription(uint32_t weight) const;
 
 		std::unique_ptr<ItemAttributes> attributes;
+		std::unique_ptr<ItemAbilities> abilities;
 
 		uint32_t referenceCounter = 0;
 
