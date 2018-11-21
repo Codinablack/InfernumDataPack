@@ -581,15 +581,6 @@ Attr_ReadValue Item::readAttr(AttrTypes_t attr, PropStream& propStream)
 			break;
 		}
 
-		case ATTR_BONUSHEALING: {
-			uint16_t bonusHealing;
-			if (!propStream.read<uint16_t>(bonusHealing)) {
-				return ATTR_READ_ERROR;
-			}
-			setIntAttr(ITEM_ATTRIBUTE_BONUSHEALING, bonusHealing);
-			break;
-		}
-
 		//these should be handled through derived classes
 		//If these are called then something has changed in the items.xml since the map was saved
 		//just read the values
@@ -685,380 +676,22 @@ bool Item::unserializeAttr(PropStream& propStream)
 
 Ability_ReadValue Item::readAbility(AbilityTypes_t type, PropStream& propStream)
 {
-	switch (type) {
-		case ABILITY_HEALTHGAIN: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_HEALTHGAIN, value);
-			break;
+	// not as performant but its less cancer
+	for (int i = ABILITY_START; i <= ABILITY_END; i++) {
+		if (type != static_cast<AbilityTypes_t>(i)) {
+			continue;
 		}
-		case ABILITY_HEALTHTICKS: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_HEALTHTICKS, value);
-			break;
-		}
-		case ABILITY_MANAGAIN: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MANAGAIN, value);
-			break;
-		}
-		case ABILITY_MANATICKS: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MANATICKS, value);
-			break;
-		}
-		case ABILITY_CONDITIONSUPPRESSIONS: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_CONDITIONSUPPRESSIONS, value);
-			break;
-		}
-		case ABILITY_MAXHITPOINTS: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MAXHITPOINTS, value);
-			break;
-		}
-		case ABILITY_MAXMANAPOINTS: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MAXMANAPOINTS, value);
-			break;
-		}
-		case ABILITY_MAGICPOINTS: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MAGICPOINTS, value);
-			break;
-		}
-		case ABILITY_MAXHITPOINTSPERCENT: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MAXHITPOINTSPERCENT, value);
-			break;
-		}
-		case ABILITY_MAXMANAPOINTSPERCENT: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MAXMANAPOINTSPERCENT, value);
-			break;
-		}
-		case ABILITY_MAGICPOINTSPERCENT: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MAGICPOINTSPERCENT, value);
-			break;
-		}
-		case ABILITY_SKILLFIST: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_SKILLFIST, value);
-			break;
-		}
-		case ABILITY_SKILLCLUB: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_SKILLCLUB, value);
-			break;
-		}
-		case ABILITY_SKILLSWORD: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_SKILLSWORD, value);
-			break;
-		}
-		case ABILITY_SKILLAXE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_SKILLAXE, value);
-			break;
-		}
-		case ABILITY_SKILLDISTANCE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_SKILLDISTANCE, value);
-			break;
-		}
-		case ABILITY_SKILLSHIELD: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_SKILLSHIELD, value);
-			break;
-		}
-		case ABILITY_SKILLFISHING: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_SKILLFISHING, value);
-			break;
-		}
-		case ABILITY_CRITICALHITCHANCE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_CRITICALHITCHANCE, value);
-			break;
-		}
-		case ABILITY_CRITICALHITAMOUNT: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_CRITICALHITAMOUNT, value);
-			break;
-		}
-		case ABILITY_LIFELEECHCHANCE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_LIFELEECHCHANCE, value);
-			break;
-		}
-		case ABILITY_LIFELEECHAMOUNT: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_LIFELEECHAMOUNT, value);
-			break;
-		}
-		case ABILITY_MANALEECHCHANCE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MANALEECHCHANCE, value);
-			break;
-		}
-		case ABILITY_MANALEECHAMOUNT: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MANALEECHAMOUNT, value);
-			break;
-		}
-		case ABILITY_SPEED: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_SPEED, value);
-			break;
-		}
-		case ABILITY_ABSORBPHYSICAL: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ABSORBPHYSICAL, value);
-			break;
-		}
-		case ABILITY_ABSORBENERGY: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ABSORBENERGY, value);
-			break;
-		}
-		case ABILITY_ABSORBEARTH: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ABSORBEARTH, value);
-			break;
-		}
-		case ABILITY_ABSORBFIRE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ABSORBFIRE, value);
-			break;
-		}
-		case ABILITY_ABSORBWATER: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ABSORBWATER, value);
-			break;
-		}
-		case ABILITY_ABSORBICE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ABSORBICE, value);
-			break;
-		}
-		case ABILITY_ABSORBHOLY: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ABSORBHOLY, value);
-			break;
-		}
-		case ABILITY_ABSORBDEATH: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ABSORBDEATH, value);
-			break;
-		}
-		case ABILITY_FIELDABSORBPHYSICAL: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_FIELDABSORBPHYSICAL, value);
-			break;
-		}
-		case ABILITY_FIELDABSORBENERGY: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_FIELDABSORBENERGY, value);
-			break;
-		}
-		case ABILITY_FIELDABSORBEARTH: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_FIELDABSORBEARTH, value);
-			break;
-		}
-		case ABILITY_FIELDABSORBFIRE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_FIELDABSORBFIRE, value);
-			break;
-		}
-		case ABILITY_FIELDABSORBWATER: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_FIELDABSORBWATER, value);
-			break;
-		}
-		case ABILITY_FIELDABSORBICE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_FIELDABSORBICE, value);
-			break;
-		}
-		case ABILITY_FIELDABSORBHOLY: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_FIELDABSORBHOLY, value);
-			break;
-		}
-		case ABILITY_FIELDABSORBDEATH: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_FIELDABSORBDEATH, value);
-			break;
-		}
-		case ABILITY_ELEMENTTYPE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ELEMENTTYPE, value);
-			break;
-		}
-		case ABILITY_ELEMENTDAMAGE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_ELEMENTDAMAGE, value);
-			break;
-		}
-		case ABILITY_MANASHIELD: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_MANASHIELD, value);
-			break;
-		}
-		case ABILITY_INVISIBLE: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_INVISIBLE, value);
-			break;
-		}
-		case ABILITY_REGENERATION: {
-			int64_t value;
-			if (!propStream.read<int64_t>(value)) {
-				return ABILITY_READ_ERROR;
-			}
-			setAbilityInt(ITEM_ABILITY_REGENERATION, value);
-			break;
-		}
-		default:
+		itemAbilityTypes abilityType = static_cast<itemAbilityTypes>(1ULL << (i - 1));
+		int64_t value;
+		if (!propStream.read<int64_t>(value)) {
 			return ABILITY_READ_ERROR;
+		}
+		setAbilityInt(abilityType, value);
+		return ABILITY_READ_CONTINUE;
 	}
-	return ABILITY_READ_CONTINUE;
+	return ABILITY_READ_ERROR;
 }
+
  bool Item::unserializeAbility(PropStream& propStream)
 {
 	uint8_t ability_type;
@@ -1193,11 +826,6 @@ void Item::serializeAttr(PropWriteStream& propWriteStream) const
 	if (hasAttribute(ITEM_ATTRIBUTE_SHOOTRANGE)) {
 		propWriteStream.write<uint8_t>(ATTR_SHOOTRANGE);
 		propWriteStream.write<uint8_t>(getIntAttr(ITEM_ATTRIBUTE_SHOOTRANGE));
-	}
-
-	if (hasAttribute(ITEM_ATTRIBUTE_BONUSHEALING)) {
-		propWriteStream.write<uint16_t>(ATTR_BONUSHEALING);
-		propWriteStream.write<uint16_t>(getIntAttr(ITEM_ATTRIBUTE_BONUSHEALING));
 	}
 
 	if (hasAttribute(ITEM_ATTRIBUTE_CUSTOM)) {
@@ -1548,8 +1176,92 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance,
 				s << "protection all fields " << std::showpos << show << std::noshowpos << '%';
 			}
 
+			int64_t damageMitigation = item ? item->getAbilityValue(ITEM_ABILITY_DAMAGEMITIGATION) : (it.abilities ? it.abilities->damageMitigation : 0);
+			if (damageMitigation != 0) {
+				if (begin) {
+					begin = false;
+					s << " (";
+				} else {
+					s << ", ";
+				}
+
+				s << "damage mitigation " << std::showpos << damageMitigation << std::noshowpos << '%';
+			}
+
+			int64_t bonusRegen = item ? item->getAbilityValue(ITEM_ABILITY_BONUSREGEN) : (it.abilities ? it.abilities->bonusRegen : 0);
+			if (bonusRegen != 0) {
+				if (begin) {
+					begin = false;
+					s << " (";
+				} else {
+					s << ", ";
+				}
+
+				s << "bonus regen " << std::showpos << bonusRegen << std::noshowpos;
+			}
+
+			int64_t magicDamage = item ? item->getAbilityValue(ITEM_ABILITY_MAGICDAMAGE) : (it.abilities ? it.abilities->magicDamage : 0);
+			if (magicDamage != 0) {
+				if (begin) {
+					begin = false;
+					s << " (";
+				} else {
+					s << ", ";
+				}
+
+				s << "magic damage " << std::showpos << magicDamage << std::noshowpos << '%';
+			}
+
+			int64_t supportHealing = item ? item->getAbilityValue(ITEM_ABILITY_SUPPORTHEALING) : (it.abilities ? it.abilities->supportHealing : 0);
+			if (supportHealing != 0) {
+				if (begin) {
+					begin = false;
+					s << " (";
+				} else {
+					s << ", ";
+				}
+
+				s << "support healing " << std::showpos << supportHealing << std::noshowpos << '%';
+			}
+
+			int64_t bonusHealing = item ? item->getAbilityValue(ITEM_ABILITY_BONUSHEALING) : (it.abilities ? it.abilities->bonusHealing : 0);
+			if (bonusHealing != 0) {
+				if (begin) {
+					begin = false;
+					s << " (";
+				} else {
+					s << ", ";
+				}
+
+				s << "bonus healing " << std::showpos << bonusHealing << std::noshowpos << '%';
+			}
+
+			int64_t attackSpeed = item ? item->getAbilityValue(ITEM_ABILITY_ATTACKSPEED) : (it.abilities ? it.abilities->attackSpeed : 0);
+			if (attackSpeed != 0) {
+				if (begin) {
+					begin = false;
+					s << " (";
+				} else {
+					s << ", ";
+				}
+
+				s << "attack speed " << std::showpos << attackSpeed << std::noshowpos << '%';
+			}
+
+			int64_t flexSkill = item ? item->getAbilityValue(ITEM_ABILITY_FLEXSKILL) : (it.abilities ? it.abilities->flexSkill : 0);
+			if (flexSkill != 0) {
+				if (begin) {
+					begin = false;
+					s << " (";
+				} else {
+					s << ", ";
+				}
+
+				s << "flexible skill " << std::showpos << flexSkill << std::noshowpos;
+			}
+
 			int64_t speed = item ? item->getAbilityValue(ITEM_ABILITY_SPEED) : (it.abilities ? it.abilities->speed : 0);
-			if (speed) {
+			if (speed != 0) {
 				if (begin) {
 					begin = false;
 					s << " (";
@@ -1970,6 +1682,20 @@ const ItemAbilities::Ability* ItemAbilities::getExistingAbility(itemAbilityTypes
 		return 0;
 	}
 	switch (type) {
+		case ITEM_ABILITY_DAMAGEMITIGATION:
+			return it.abilities->damageMitigation;
+		case ITEM_ABILITY_BONUSREGEN:
+			return it.abilities->bonusRegen;
+		case ITEM_ABILITY_MAGICDAMAGE:
+			return it.abilities->magicDamage;
+		case ITEM_ABILITY_SUPPORTHEALING:
+			return it.abilities->supportHealing;
+		case ITEM_ABILITY_ATTACKSPEED:
+			return it.abilities->attackSpeed;
+		case ITEM_ABILITY_FLEXSKILL:
+			return it.abilities->flexSkill;
+		case ITEM_ABILITY_BONUSHEALING:
+			return it.abilities->bonusHealing;
 		case ITEM_ABILITY_HEALTHGAIN:
 			return it.abilities->healthGain;
 		case ITEM_ABILITY_HEALTHTICKS:

@@ -1449,7 +1449,6 @@ void LuaScriptInterface::registerFunctions()
 	registerEnum(ITEM_ATTRIBUTE_CHARGES)
 	registerEnum(ITEM_ATTRIBUTE_FLUIDTYPE)
 	registerEnum(ITEM_ATTRIBUTE_DOORID)
-	registerEnum(ITEM_ATTRIBUTE_BONUSHEALING)
 
 	registerEnum(ITEM_ABILITY_NONE)
 	registerEnum(ITEM_ABILITY_HEALTHGAIN)
@@ -1498,6 +1497,13 @@ void LuaScriptInterface::registerFunctions()
 	registerEnum(ITEM_ABILITY_MANASHIELD)
 	registerEnum(ITEM_ABILITY_INVISIBLE)
 	registerEnum(ITEM_ABILITY_REGENERATION)
+	registerEnum(ITEM_ABILITY_DAMAGEMITIGATION)
+	registerEnum(ITEM_ABILITY_BONUSREGEN)
+	registerEnum(ITEM_ABILITY_MAGICDAMAGE)
+	registerEnum(ITEM_ABILITY_SUPPORTHEALING)
+	registerEnum(ITEM_ABILITY_ATTACKSPEED)
+	registerEnum(ITEM_ABILITY_FLEXSKILL)
+	registerEnum(ITEM_ABILITY_BONUSHEALING)
 
 	registerEnum(ITEM_TYPE_DEPOT)
 	registerEnum(ITEM_TYPE_MAILBOX)
@@ -2422,6 +2428,7 @@ void LuaScriptInterface::registerFunctions()
     registerMethod("Player", "setAttackSpeed", LuaScriptInterface::luaPlayerSetAttackSpeed);
 
 	registerMethod("Player", "castSpell", LuaScriptInterface::luaPlayerCastSpell);
+	registerMethod("Player", "getEffectiveAbility", LuaScriptInterface::luaPlayerGetEffectiveAbility);
 
 	// Monster
 	registerClass("Monster", "Creature", LuaScriptInterface::luaMonsterCreate);
@@ -9780,6 +9787,19 @@ int LuaScriptInterface::luaPlayerCastSpell(lua_State* L)
 			g_game.internalCreatureSay(player, TALKTYPE_MONSTER_SAY, spell->getWords(), false);
 		}
 		pushBoolean(L, result);
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerGetEffectiveAbility(lua_State* L)
+{
+	// player:getEffectiveAbility(ability)
+	Player* player = getUserdata<Player>(L, 1);
+	itemAbilityTypes ability = static_cast<itemAbilityTypes>(getNumber<uint64_t>(L, 2));
+	if (player && ability) {
+		lua_pushnumber(L, player->getEffectiveAbility(ability));
 	} else {
 		lua_pushnil(L);
 	}

@@ -638,6 +638,8 @@ class Player final : public Creature, public Cylinder
 		void addManaSpent(uint64_t amount);
 		void addSkillAdvance(skills_t skill, uint64_t count);
 
+		int64_t getEffectiveAbility(itemAbilityTypes abilityType) const;
+
 		int32_t getArmor() const override;
 		int32_t getDefense() const override;
 		float getAttackFactor() const override;
@@ -1329,10 +1331,10 @@ class Player final : public Creature, public Cylinder
             attackSpeed = speed;
         }
 		uint32_t getAttackSpeed() const {
-            if (attackSpeed > 0) {
-                return attackSpeed;
-            }
-            return vocation->getAttackSpeed();
+			int64_t bonusPercent = getEffectiveAbility(ITEM_ABILITY_ATTACKSPEED);
+			int64_t as = (attackSpeed > 0) ? attackSpeed : vocation->getAttackSpeed();
+			as -= as * (bonusPercent / 100.);
+            return as;
         }
 
 		static uint8_t getPercentLevel(uint64_t count, uint64_t nextLevelCount);

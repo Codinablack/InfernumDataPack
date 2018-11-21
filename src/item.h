@@ -103,7 +103,6 @@ enum AttrTypes_t {
 	ATTR_HITCHANCE = 32,
 	ATTR_SHOOTRANGE = 33,
 	ATTR_CUSTOM_ATTRIBUTES = 34,
-	ATTR_BONUSHEALING = 35,
 };
 
 enum AbilityTypes_t {
@@ -153,8 +152,15 @@ enum AbilityTypes_t {
 	ABILITY_MANASHIELD = 44,
 	ABILITY_INVISIBLE = 45,
 	ABILITY_REGENERATION = 46,
+	ABILITY_DAMAGEMITIGATION = 47,
+	ABILITY_BONUSREGEN = 48,
+	ABILITY_MAGICDAMAGE = 49,
+	ABILITY_SUPPORTHEALING = 50,
+	ABILITY_ATTACKSPEED = 51,
+	ABILITY_FLEXSKILL = 52,
+	ABILITY_BONUSHEALING = 53,
  	ABILITY_START = ABILITY_HEALTHGAIN,
-	ABILITY_END = ABILITY_REGENERATION
+	ABILITY_END = ABILITY_BONUSHEALING
 };
  enum Ability_ReadValue {
 	ABILITY_READ_CONTINUE,
@@ -215,7 +221,7 @@ enum AbilityTypes_t {
 		Ability& getAbility(itemAbilityTypes type);
  	public:
 		static bool isAbility(itemAbilityTypes type) {
-			return (type & 0x3fffffffffff) != 0;
+			return (type & 0x1fffffffffffff) != 0; // implementation, item::getdescription
 		}
  		const std::forward_list<Ability>& getAbilities() const {
 			return abilityList;
@@ -969,12 +975,6 @@ class Item : virtual public Thing
 				return getIntAttr(ITEM_ATTRIBUTE_ARMOR);
 			}
 			return items[id].armor;
-		}
-		uint16_t getHealing() const {
-			if (hasAttribute(ITEM_ATTRIBUTE_BONUSHEALING)) {
-				return getIntAttr(ITEM_ATTRIBUTE_BONUSHEALING);
-			}
-			return items[id].bonusHealing;
 		}
 		int32_t getDefense() const {
 			if (hasAttribute(ITEM_ATTRIBUTE_DEFENSE)) {

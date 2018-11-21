@@ -993,6 +993,8 @@ class LuaScriptInterface
 
 		static int luaPlayerCastSpell(lua_State* L);
 
+		static int luaPlayerGetEffectiveAbility(lua_State* L);
+
 		// Monster
 		static int luaMonsterCreate(lua_State* L);
 

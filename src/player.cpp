@@ -303,6 +303,20 @@ int32_t Player::getArmor() const
 	return static_cast<int32_t>(armor * vocation->armorMultiplier);
 }
 
+int64_t Player::getEffectiveAbility(itemAbilityTypes abilityType) const
+{
+	int32_t value = 0;
+
+	static const slots_t armorSlots[] = {CONST_SLOT_HEAD, CONST_SLOT_NECKLACE, CONST_SLOT_ARMOR, CONST_SLOT_LEGS, CONST_SLOT_FEET, CONST_SLOT_RING};
+	for (slots_t slot : armorSlots) {
+		Item* inventoryItem = inventory[slot];
+		if (inventoryItem) {
+			value += inventoryItem->getAbilityValue(abilityType);
+		}
+	}
+	return value;
+}
+
 void Player::getShieldAndWeapon(const Item*& shield, const Item*& weapon) const
 {
 	shield = nullptr;
@@ -4017,7 +4031,7 @@ void Player::updateAbilityConditions(Item* item, slots_t slot, bool equip)
 		return;
 	}
  	bool needUpdateSkills = false;
- 	for (int32_t i = STAT_FIRST; i <= SKILL_LAST; i++) {
+ 	for (int32_t i = SKILL_FIRST; i <= SKILL_LAST; i++) {
 		itemAbilityTypes type = skillToAbility(i);
 		if (type == ITEM_ABILITY_NONE) {
 			continue;
@@ -4029,7 +4043,7 @@ void Player::updateAbilityConditions(Item* item, slots_t slot, bool equip)
 		setVarSkill(static_cast<skills_t>(i), equip ? value : -value);
 		needUpdateSkills = true;
 	}
- 	for (int32_t i = 0; i <= SPECIALSKILL_LAST; i++) {
+ 	for (int32_t i = SPECIALSKILL_FIRST; i <= SPECIALSKILL_LAST; i++) {
 		itemAbilityTypes type = specialSkillToAbility(i);
 		if (type == ITEM_ABILITY_NONE) {
 			continue;
@@ -4040,6 +4054,38 @@ void Player::updateAbilityConditions(Item* item, slots_t slot, bool equip)
 		}
 		setVarSpecialSkill(static_cast<SpecialSkills_t>(i), equip ? value : -value);
 		needUpdateSkills = true;
+	}
+	int64_t flexSkill =  item->getAbilityValue(ITEM_ABILITY_FLEXSKILL);
+	if (flexSkill > 0) {
+		static std::vector<std::pair<std::vector<int>, std::vector<stats_t>>> flexStats = {
+			{{1, 2}, {STAT_MAGICPOINTS}}
+		};
+		static std::vector<std::pair<std::vector<int>, std::vector<skills_t>>> flexSkills = {
+			{{3, 4}, {SKILL_DISTANCE}},
+			{{5, 6}, {SKILL_FIST, SKILL_AXE, SKILL_SWORD, SKILL_CLUB}}
+		};
+		for (auto& it : flexStats) {
+			std::vector<int>& vocList = it.first;
+			std::vector<stats_t>& statList = it.second;
+			if (std::find(vocList.begin(), vocList.end(), getVocationId()) != vocList.end()) {
+				for (auto& stat : statList) {
+					setVarStats(stat, equip ? flexSkill : -flexSkill);
+				}
+				needUpdateSkills = true;
+				break;
+			}
+		}
+		for (auto& it : flexSkills) {
+			std::vector<int>& vocList = it.first;
+			std::vector<skills_t>& skillList = it.second;
+			if (std::find(vocList.begin(), vocList.end(), getVocationId()) != vocList.end()) {
+				for (auto& skill : skillList) {
+					setVarSkill(skill, equip ? flexSkill : -flexSkill);
+				}
+				needUpdateSkills = true;
+				break;
+			}
+		}
 	}
  	if (needUpdateSkills) {
 		sendSkills();

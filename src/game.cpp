@@ -3866,6 +3866,16 @@ bool Game::combatChangeHealth(Creature* attacker, Creature* target, CombatDamage
 			}
 		}
 
+		if (targetPlayer) {
+			if (attackerPlayer && targetPlayer) {
+				int64_t supportHealing = attackerPlayer->getEffectiveAbility(ITEM_ABILITY_SUPPORTHEALING);
+				damage.primary.value += damage.primary.value * (supportHealing / 100.);
+			} else {
+				int64_t bonusHealing = targetPlayer->getEffectiveAbility(ITEM_ABILITY_BONUSHEALING);
+				damage.primary.value += damage.primary.value * (bonusHealing / 100.);
+			}
+		}	
+
 		int32_t realHealthChange = target->getHealth();
 		target->gainHealth(attacker, damage.primary.value);
 		realHealthChange = target->getHealth() - realHealthChange;
@@ -4196,11 +4206,9 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, CombatDamage& 
 
 	int32_t manaChange = damage.primary.value + damage.secondary.value;
 	if (manaChange > 0) {
-		if (attacker) {
-			const Player* attackerPlayer = attacker->getPlayer();
-			if (attackerPlayer && attackerPlayer->getSkull() == SKULL_BLACK && attackerPlayer->getSkullClient(target) == SKULL_NONE) {
-				return false;
-			}
+		const Player* attackerPlayer = attacker ? attacker->getPlayer() : nullptr;
+		if (attackerPlayer && attackerPlayer->getSkull() == SKULL_BLACK && attackerPlayer->getSkullClient(target) == SKULL_NONE) {
+			return false;
 		}
 
 		if (damage.origin != ORIGIN_NONE) {
@@ -4213,6 +4221,11 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, CombatDamage& 
 				return combatChangeMana(attacker, target, damage);
 			}
 		}
+
+		if (targetPlayer) {
+			int64_t bonusHealing = targetPlayer->getEffectiveAbility(ITEM_ABILITY_BONUSHEALING);
+			damage.primary.value += damage.primary.value * (bonusHealing / 100.);
+		}	
 
 		int32_t realManaChange = targetPlayer->getMana();
 		targetPlayer->changeMana(manaChange);

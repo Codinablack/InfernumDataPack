@@ -99,7 +99,13 @@ enum ItemParseAttributes_t {
 	ITEM_PARSE_MAXHITCHANCE,
 	ITEM_PARSE_INVISIBLE,
 	ITEM_PARSE_SPEED,
+	ITEM_PARSE_SUPPORTHEALING,
+	ITEM_PARSE_BONUSREGEN,
 	ITEM_PARSE_BONUSHEALING,
+	ITEM_PARSE_ATTACKSPEED,
+	ITEM_PARSE_FLEXSKILL,
+	ITEM_PARSE_DAMAGEMITIGATION,
+	ITEM_PARSE_MAGICDAMAGE,
 	ITEM_PARSE_HEALTHGAIN,
 	ITEM_PARSE_HEALTHTICKS,
 	ITEM_PARSE_MANAGAIN,
@@ -196,6 +202,14 @@ struct Abilities {
 	//elemental damage
 	uint16_t elementDamage = 0;
 	CombatType_t elementType = COMBAT_NONE;
+
+	int64_t damageMitigation = 0;
+	int64_t bonusRegen = 0;
+	int64_t magicDamage = 0;
+	int64_t supportHealing = 0;
+	int64_t bonusHealing = 0;
+	int64_t attackSpeed = 0;
+	int64_t flexSkill = 0;
 
 	bool manaShield = false;
 	bool invisible = false;

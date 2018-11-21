@@ -541,6 +541,36 @@ void Combat::CombatHealthFunc(Creature* caster, Creature* target, const CombatPa
 		}
 	}
 
+	auto isMagicDamage = [damage]() {
+		switch (damage.primary.type) {
+			case COMBAT_FIREDAMAGE:
+			case COMBAT_ICEDAMAGE:
+			case COMBAT_ENERGYDAMAGE:
+			case COMBAT_EARTHDAMAGE:
+			case COMBAT_DEATHDAMAGE:
+			case COMBAT_HOLYDAMAGE:
+			case COMBAT_DROWNDAMAGE:
+				return true;
+			default:
+				return false;
+		}
+	};
+
+	if (casterPlayer && isMagicDamage()) {
+		int64_t bonusMD = casterPlayer->getEffectiveAbility(ITEM_ABILITY_MAGICDAMAGE);
+		damage.primary.value += damage.primary.value * (bonusMD / 100.);
+		damage.secondary.value += damage.secondary.value * (bonusMD / 100.);
+	}
+
+	if (targetPlayer) {
+		int64_t mitigation = targetPlayer->getEffectiveAbility(ITEM_ABILITY_DAMAGEMITIGATION);
+		if (casterPlayer) {
+			mitigation /= 2;
+		}
+		damage.primary.value += std::abs(damage.primary.value * (mitigation / 100.));
+		damage.secondary.value += std::abs(damage.secondary.value * (mitigation / 100.));
+	}
+
     if ((damage.primary.value < 0 || damage.secondary.value < 0) && caster) {
         if (targetPlayer && casterPlayer && targetPlayer->getSkull() != SKULL_BLACK) {
             damage.primary.value /= 2;
@@ -607,6 +637,36 @@ void Combat::CombatManaFunc(Creature* caster, Creature* target, const CombatPara
             damageCopy.primary.value /= 2;
         }
     }
+
+	auto isMagicDamage = [damageCopy]() {
+		switch (damageCopy.primary.type) {
+			case COMBAT_FIREDAMAGE:
+			case COMBAT_ICEDAMAGE:
+			case COMBAT_ENERGYDAMAGE:
+			case COMBAT_EARTHDAMAGE:
+			case COMBAT_DEATHDAMAGE:
+			case COMBAT_HOLYDAMAGE:
+			case COMBAT_DROWNDAMAGE:
+				return true;
+			default:
+				return false;
+		}
+	};
+
+	if (casterPlayer && isMagicDamage()) {
+		int64_t bonusMD = casterPlayer->getEffectiveAbility(ITEM_ABILITY_MAGICDAMAGE);
+		damageCopy.primary.value += damageCopy.primary.value * (bonusMD / 100.);
+		damageCopy.secondary.value += damageCopy.secondary.value * (bonusMD / 100.);
+	}
+
+	if (targetPlayer) {
+		int64_t mitigation = targetPlayer->getEffectiveAbility(ITEM_ABILITY_DAMAGEMITIGATION);
+		if (casterPlayer) {
+			mitigation /= 2;
+		}
+		damageCopy.primary.value += std::abs(damageCopy.primary.value * (mitigation / 100.));
+		damageCopy.secondary.value += std::abs(damageCopy.secondary.value * (mitigation / 100.));
+	}
 
     if (g_game.combatChangeMana(caster, target, damageCopy)) {
         CombatConditionFunc(caster, target, params, nullptr);

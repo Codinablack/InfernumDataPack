@@ -75,6 +75,12 @@ const std::unordered_map<std::string, ItemParseAttributes_t> ItemParseAttributes
 	{"invisible", ITEM_PARSE_INVISIBLE},
 	{"speed", ITEM_PARSE_SPEED},
 	{"bonushealing", ITEM_PARSE_BONUSHEALING},
+	{"damagemitigation", ITEM_PARSE_DAMAGEMITIGATION},
+	{"bonusregen", ITEM_PARSE_BONUSREGEN},
+	{"supporthealing", ITEM_PARSE_SUPPORTHEALING},
+	{"attackspeed", ITEM_PARSE_ATTACKSPEED},
+	{"flexskill", ITEM_PARSE_FLEXSKILL},
+	{"magicdamage", ITEM_PARSE_MAGICDAMAGE},
 	{"healthgain", ITEM_PARSE_HEALTHGAIN},
 	{"healthticks", ITEM_PARSE_HEALTHTICKS},
 	{"managain", ITEM_PARSE_MANAGAIN},
@@ -866,7 +872,38 @@ void Items::parseItemNode(const pugi::xml_node& itemNode, uint16_t id)
 				}
 
 				case ITEM_PARSE_BONUSHEALING: {
-					it.bonusHealing = pugi::cast<uint16_t>(valueAttribute.value());
+					abilities.bonusHealing = pugi::cast<uint16_t>(valueAttribute.value());
+					break;
+				}
+
+				case ITEM_PARSE_SUPPORTHEALING: {
+					abilities.supportHealing = pugi::cast<uint16_t>(valueAttribute.value());
+					break;
+				}
+
+				case ITEM_PARSE_ATTACKSPEED: {
+					abilities.attackSpeed = pugi::cast<uint16_t>(valueAttribute.value());
+					break;
+				}
+
+				case ITEM_PARSE_FLEXSKILL: {
+					abilities.flexSkill = pugi::cast<uint16_t>(valueAttribute.value());
+					break;
+				}
+
+				case ITEM_PARSE_DAMAGEMITIGATION: {
+					abilities.damageMitigation = pugi::cast<uint16_t>(valueAttribute.value());
+					break;
+				}
+
+				case ITEM_PARSE_BONUSREGEN: {
+					abilities.bonusRegen = pugi::cast<uint16_t>(valueAttribute.value());
+					break;
+				}
+
+				case ITEM_PARSE_MAGICDAMAGE: {
+					abilities.magicDamage = pugi::cast<uint16_t>(valueAttribute.value());
+					break;
 				}
 
 				case ITEM_PARSE_HEALTHGAIN: {
