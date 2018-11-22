@@ -983,20 +983,6 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance,
 						s << " physical + " << elementDamage << ' ' << getCombatName(static_cast<CombatType_t>(elementType));
 					}
 				}
-
-				if (defense != 0 || extraDefense != 0) {
-					if (begin) {
-						begin = false;
-						s << " (";
-					} else {
-						s << ", ";
-					}
-
-					s << "Def:" << defense;
-					if (extraDefense != 0) {
-						s << ' ' << std::showpos << extraDefense << std::noshowpos;
-					}
-				}
 			}
 			if (!begin) {
 				s << ')';
@@ -1018,12 +1004,6 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance,
 			if (volume != 0) {
 				s << " (Vol:" << volume << ')';
 			}
-		}
-
-		int32_t armor = (item ? item->getArmor() : it.armor);
-		if (armor != 0) {
-			s << " (Arm:" << armor;
-			begin = false;
 		}
 
 		if (item && item->abilities || it.abilities) {
