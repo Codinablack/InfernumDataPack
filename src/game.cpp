@@ -1770,6 +1770,9 @@ void Game::playerMove(uint32_t playerId, Direction direction)
 		return;
 	}
 
+	Position position = player->getPosition();
+	g_events->eventPlayerOnMove(player, position, getNextPosition(direction, position), direction);
+
 	player->resetIdleTime();
 	player->setNextWalkActionTask(nullptr);
 
