@@ -14,3 +14,23 @@ local slotBits = {
 function ItemType.usesSlot(self, slot)
 	return bit.band(self:getSlotPosition(), slotBits[slot] or 0) ~= 0
 end
+
+function ItemType.isWeapon(self)
+	local weptype = self:getWeaponType()
+	return weptype ~= WEAPON_NONE and weptype ~= WEAPON_AMMO and weptype ~= WEAPON_SHIELD
+end
+
+function ItemType.isShield(self)
+	return self:getWeaponType() == WEAPON_SHIELD
+end
+
+function ItemType.isArmor(self)
+	for slot = 1, 10 do
+		if slot ~= CONST_SLOT_LEFT and slot ~= CONST_SLOT_RIGHT then
+			if self:usesSlot(slot) then
+				return true
+			end
+		end
+	end
+	return false
+end

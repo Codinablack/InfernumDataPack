@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<npc name="Ilsior" script="ilsior.lua" walkinterval="2000" floorchange="0" speechbubble="3">
+	<health now="100" max="100" />
+	<look type="130" head="38" body="107" legs="89" feet="95" addons="3" />
+	<parameters>
+		<parameter key="message_greet" value="Greetings |PLAYERNAME|. I can increase your magical {powers} for a fee." />
+		<parameter key="message_decline" value="Farewell, |PLAYERNAME|." />
+	</parameters>
+</npc>

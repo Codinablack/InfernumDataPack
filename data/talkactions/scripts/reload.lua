@@ -1,4 +1,4 @@
-local reloadTypes = {
+reloadTypes = {
 	["all"] = { targetType = RELOAD_TYPE_ALL, name = "all" },
 
 	["action"] = { targetType = RELOAD_TYPE_ACTIONS, name = "actions" },
@@ -54,14 +54,6 @@ local reloadTypes = {
 }
 
 function onSay(player, words, param)
-	if not player:getGroup():getAccess() then
-		return true
-	end
-
-	if player:getAccountType() < ACCOUNT_TYPE_GOD then
-		return false
-	end
-
 	logCommand(player, words, param)
 
 	local reloadType = reloadTypes[param and param:lower()]

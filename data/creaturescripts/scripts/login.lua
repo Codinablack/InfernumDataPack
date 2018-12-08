@@ -29,8 +29,12 @@ function onLogin(player)
 		player:setVocation(vocation:getDemotion())
 	end
 
+	player:regen()
+
 	-- Events
 	player:registerEvent("PlayerDeath")
 	player:registerEvent("DropLoot")
+	player:registerEvent("advance")
+	player:registerEvent("modal window helper")
 	return true
 end

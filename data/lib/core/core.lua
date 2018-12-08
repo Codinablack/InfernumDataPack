@@ -1,11 +1,6 @@
-dofile('data/lib/core/constants.lua')
-dofile('data/lib/core/container.lua')
-dofile('data/lib/core/creature.lua')
-dofile('data/lib/core/game.lua')
-dofile('data/lib/core/item.lua')
-dofile('data/lib/core/itemtype.lua')
-dofile('data/lib/core/player.lua')
-dofile('data/lib/core/position.lua')
-dofile('data/lib/core/teleport.lua')
-dofile('data/lib/core/tile.lua')
-dofile('data/lib/core/vocation.lua')
+--// load all files in current directory
+for file in io.popen([[dir "data/lib/core" /b /aa /s]]):lines() do
+	if not file:match("core%.lua") and file:match("(%.lua)") then
+		dofile(file)
+	end
+end

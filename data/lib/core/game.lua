@@ -1,5 +1,19 @@
+function Game.getMonsterSpectators(position, multifloor, minRangeX, maxRangeX, minRangeY, maxRangeY)
+	local ret = {}
+	local specs = Game.getSpectators(position, multifloor, false, minRangeX, maxRangeX, minRangeY, maxRangeY)
+	if #specs > 0 then
+		for i = 1, #specs do
+			local creature = specs[i]
+			if creature:isMonster() then
+				ret[#ret+1] = creature
+			end
+		end
+	end
+	return ret
+end
+
 function Game.broadcastMessage(message, messageType)
-	if not messageType then
+	if messageType == nil then
 		messageType = MESSAGE_STATUS_WARNING
 	end
 
@@ -9,14 +23,7 @@ function Game.broadcastMessage(message, messageType)
 end
 
 function Game.convertIpToString(ip)
-	local band = bit.band
-	local rshift = bit.rshift
-	return string.format("%d.%d.%d.%d",
-		band(ip, 0xFF),
-		band(rshift(ip, 8), 0xFF),
-		band(rshift(ip, 16), 0xFF),
-		rshift(ip, 24)
-	)
+
 end
 
 function Game.getReverseDirection(direction)
@@ -60,7 +67,7 @@ if not globalStorageTable then
 end
 
 function Game.getStorageValue(key)
-	return globalStorageTable[key]
+	return globalStorageTable[key] or -1
 end
 
 function Game.setStorageValue(key, value)

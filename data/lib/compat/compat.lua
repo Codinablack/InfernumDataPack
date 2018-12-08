@@ -880,7 +880,7 @@ function getThingPos(uid)
 	return position
 end
 
-function getThingfromPos(pos)
+function getThingFromPos(pos)
 	local tile = Tile(pos)
 	if tile == nil then
 		return pushThing(nil)

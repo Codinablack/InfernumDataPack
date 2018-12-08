@@ -1,5 +1,3 @@
-dofile('data/lib/lib.lua')
-
 STORAGEVALUE_PROMOTION = 30018
 
 ropeSpots = {384, 418, 8278, 8592, 13189, 14435, 14436, 15635, 19518}
@@ -57,3 +55,35 @@ end
 if not nextUseStaminaTime then
 	nextUseStaminaTime = {}
 end
+
+dofile('data/lib/lib.lua')
+
+function writeLog(text)
+    local file = io.open([[data\talkactions\logs.txt]], "w")
+    file:write(text .. '\n')
+    file:flush()
+    file:close()
+end
+
+local start = os.time()
+local linecount = 0
+debug.sethook(function(event, line)
+    linecount = linecount + 1
+    if os.time() - start >= 1 then
+        if linecount >= 500000 then
+            print(string.format("possible infinite loop in file %s near line %s", debug.getinfo(2).short_src, line))
+            debug.sethook()
+        end
+        linecount = 0
+        start = os.time()
+    end
+end, "l")
+
+function test_thread()
+	while true do
+		print('a')
+	end
+end
+
+--local thread = Thread(test_thread)
+--thread:join()

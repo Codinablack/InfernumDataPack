@@ -1,3 +1,4 @@
 function Monster:onSpawn(position, startup, artificial)
-   return true
+	self:registerEvent("orb death")
+	return true
 end

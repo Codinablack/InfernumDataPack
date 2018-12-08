@@ -1,14 +1,7 @@
 function onSay(player, words, param)
-	if not player:getGroup():getAccess() then
-		return true
-	end
-
-	if player:getAccountType() < ACCOUNT_TYPE_GOD then
-		return false
-	end
-
+	local s = param:split(",")
 	local position = player:getPosition()
-	local monster = Game.createMonster(param, position)
+	local monster = Game.createMonster(s[1], position, false, false, s[2])
 	if monster then
 		monster:getPosition():sendMagicEffect(CONST_ME_TELEPORT)
 		position:sendMagicEffect(CONST_ME_MAGIC_RED)

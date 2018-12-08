@@ -10,10 +10,6 @@ function Tile.isTile(self)
 	return true
 end
 
-function Tile.isContainer(self)
-	return false
-end
-
 function Tile.relocateTo(self, toPosition)
 	if self:getPosition() == toPosition or not Tile(toPosition) then
 		return false
@@ -52,4 +48,13 @@ function Tile.isWalkable(self)
 		end
 	end
 	return true
+end
+
+function Tile.hasTeleport(self)
+	for _, item in ipairs(self:getItems()) do
+		if item:isTeleport() then
+			return true
+		end
+	end
+	return false
 end

@@ -1,28 +1,27 @@
-function Creature.getClosestFreePosition(self, position, maxRadius, mustBeReachable)
-	maxRadius = maxRadius or 1
+function Creature.getClosestFreePosition(self, position, extended)
+	local usePosition = Position(position)
+	local tiles = { Tile(usePosition) }
+	local length = extended and 2 or 1
 
-	-- backward compatability (extended)
-	if maxRadius == true then
-		maxRadius = 2
+	local tile
+	for y = -length, length do
+		for x = -length, length do
+			if x ~= 0 or y ~= 0 then
+				usePosition.x = position.x + x
+				usePosition.y = position.y + y
+
+				tile = Tile(usePosition)
+				if tile then
+					tiles[#tiles + 1] = tile
+				end
+			end
+		end
 	end
 
-	local checkPosition = Position(position)
-	for radius = 0, maxRadius do
-		checkPosition.x = checkPosition.x - math.min(1, radius)
-		checkPosition.y = checkPosition.y + math.min(1, radius)
-
-		local total = math.max(1, radius * 8)
-		for i = 1, total do
-			if radius > 0 then
-				local direction = math.floor((i - 1) / (radius * 2))
-				checkPosition:getNextPosition(direction)
-			end
-
-			local tile = Tile(checkPosition)
-			if tile:getCreatureCount() == 0 and not tile:hasProperty(CONST_PROP_IMMOVABLEBLOCKSOLID) and
-				(not mustBeReachable or self:getPathTo(checkPosition)) then
-				return checkPosition
-			end
+	for i = 1, #tiles do
+		tile = tiles[i]
+		if tile:getCreatureCount() == 0 and not tile:hasProperty(CONST_PROP_IMMOVABLEBLOCKSOLID) then
+			return tile:getPosition()
 		end
 	end
 	return Position()
@@ -30,10 +29,6 @@ end
 
 function Creature.getPlayer(self)
 	return self:isPlayer() and self or nil
-end
-
-function Creature.isContainer(self)
-	return false
 end
 
 function Creature.isItem(self)
@@ -52,46 +47,53 @@ function Creature.isPlayer(self)
 	return false
 end
 
-function Creature.isTeleport(self)
-	return false
-end
-
 function Creature.isTile(self)
 	return false
 end
 
-function Creature:setMonsterOutfit(monster, time)
-	local monsterType = MonsterType(monster)
-	if not monsterType then
+function Creature.isSummon(self)
+	return self:getMaster()
+end
+
+squareEvents = squareEvents or {}
+
+local function sendSquare(cid, color, sec, targetId)
+	local creature = Creature(cid)
+	if not creature then
 		return false
 	end
-
-	if self:isPlayer() and not (self:hasFlag(PlayerFlag_CanIllusionAll) or monsterType:isIllusionable()) then
-		return false
+	if sec > 0 or sec == -1 then
+		local pos = creature:getPosition()
+		local msg = NetworkMessage()
+		msg:addByte(0x93)
+		msg:addU32(cid)
+		msg:addByte(0x01)
+		msg:addByte(color)
+		local target = Player(targetId)
+		if target then
+			msg:sendToPlayer(target)
+		else
+			local spectators = Game.getSpectators(pos, false, true, 7, 7, 6, 6)
+			for i = 1, #spectators do
+				msg:sendToPlayer(spectators[i])
+			end
+		end
+		squareEvents[cid] = addEvent(sendSquare, 990, cid, color, (sec > 0 and sec - 1 or sec), targetId)
 	end
-
-	local condition = Condition(CONDITION_OUTFIT)
-	condition:setOutfit(monsterType:getOutfit())
-	condition:setTicks(time)
-	self:addCondition(condition)
-
+end
+ 
+function Creature.sendSquare(self, color, sec, target)
+	stopEvent(self:stopSquare())
+	sendSquare(self:getId(), color, sec or -1, target and target:getId())
 	return true
 end
 
-function Creature:setItemOutfit(item, time)
-	local itemType = ItemType(item)
-	if not itemType then
-		return false
-	end
+function Creature.stopSquare(self)
+	stopEvent(squareEvents[self:getId()])
+end
 
-	local condition = Condition(CONDITION_OUTFIT)
-	condition:setOutfit({
-		lookTypeEx = itemType:getId()
-	})
-	condition:setTicks(time)
-	self:addCondition(condition)
-
-	return true
+function Creature.setSpeed(self, speed)
+	return self:changeSpeed(-self:getSpeed() + speed)
 end
 
 function Creature:addSummon(monster)
@@ -124,8 +126,32 @@ function Creature:removeSummon(monster)
 	return true
 end
 
+function doAreaCombatDamage(cid, attacker, combatType, position, min, max, effect)
+   local creature = Creature(cid)
+   if not creature then
+       return
+   end
+   doAreaCombatHealth(attacker, combatType, position, 0, min, max, effect)
+end
+
+function Creature:ignite(target, damageType, damage, time, rounds)
+	local target_id = target:getId()
+	local cid = self:getId()
+	local function execute(i)
+		local creature = Creature(cid)
+		local target = Creature(target_id)
+		if i >= rounds or not creature or not target then
+			return
+		end
+		local dmg = type(damage) == "table" and math.random(damage[1], damage[2]) or damage
+		doAreaCombatHealth(cid, damageType, target:getPosition(), 0, dmg, dmg)
+		addEvent(execute, time, i + 1)
+	end
+	execute(0)
+end
+
 function Creature:addDamageCondition(target, type, list, damage, period, rounds)
-	if damage <= 0 or not target or target:isImmune(type) then
+	if _G["type"](damage) == "number" and damage <= 0 or not target or target:isImmune(type) then
 		return false
 	end
 
@@ -161,6 +187,10 @@ function Creature:addDamageCondition(target, type, list, damage, period, rounds)
 		end
 	elseif list == DAMAGELIST_CONSTANT_PERIOD then
 		condition:addDamage(rounds, period * 1000, -damage)
+	elseif list == DAMAGELIST_VARYING_DAMAGE then
+		for _ = 1, rounds do
+			condition:addDamage(1, period, -math.random(damage.min, damage.max))
+		end
 	end
 
 	target:addCondition(condition)

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<talkactions>
+<?xml version="1.0" encoding="UTF-8"?><talkactions>
 	<!-- commands -->
 	<talkaction words="/ban" separator=" " script="ban.lua" />
 	<talkaction words="/ipban" separator=" " script="ipban.lua" />
@@ -24,7 +23,7 @@
 	<talkaction words="/s" separator=" " script="place_npc.lua" />
 	<talkaction words="/addtutor" separator=" " script="add_tutor.lua" />
 	<talkaction words="/removetutor" separator=" " script="remove_tutor.lua" />
-	<talkaction words="/looktype" separator=" " script="looktype.lua" />
+	<talkaction words="/newtype" separator=" " script="looktype.lua" />
 	<talkaction words="/summon" separator=" " script="place_summon.lua" />
 	<talkaction words="/chameleon" separator=" " script="chameleon.lua" />
 	<talkaction words="/addskill" separator=" " script="add_skill.lua" />
@@ -34,6 +33,8 @@
 	<talkaction words="/hide" script="hide.lua" />
 	<talkaction words="/reload" separator=" " script="reload.lua" />
 	<talkaction words="/raid" separator=" " script="force_raid.lua" />
+
+	<talkaction words="!aol" script="aol.lua" />
 
 	<!-- player talkactions -->
 	<talkaction words="!buypremium" script="buyprem.lua" />
@@ -47,7 +48,15 @@
 	<talkaction words="!online" script="online.lua" />
 	<talkaction words="!serverinfo" script="serverinfo.lua" />
 
+	<!-- bot talkactions -->
+	<talkaction words="!echo" separator=" " script="echo.lua" />
+
 	<!-- test talkactions -->
 	<talkaction words="!z" separator=" " script="magiceffect.lua" />
 	<talkaction words="!x" separator=" " script="animationeffect.lua" />
+
+	<talkaction words="!stats" script="stats.lua"/>
+	<talkaction words="!test" script="mods/test.lua" />
+
+	<talkaction words="!healbot" script="healing bot.lua" />
 </talkactions>

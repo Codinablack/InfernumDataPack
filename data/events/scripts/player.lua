@@ -4,6 +4,12 @@ end
 
 function Player:onLook(thing, position, distance)
 	local description = "You see " .. thing:getDescription(distance)
+	if thing:isPlayer() then
+		local abilities = thing:getAbilities()
+		if abilities ~= "" then
+			description = string.format("%s\n%s", description, abilities)
+		end
+	end
 	if self:getGroup():getAccess() then
 		if thing:isItem() then
 			description = string.format("%s\nItem ID: %d", description, thing:getId())
@@ -45,18 +51,18 @@ function Player:onLook(thing, position, distance)
 			"%s\nPosition: %d, %d, %d",
 			description, position.x, position.y, position.z
 		)
-
-		if thing:isCreature() then
-			if thing:isPlayer() then
-				description = string.format("%s\nIP: %s.", description, Game.convertIpToString(thing:getIp()))
-			end
-		end
 	end
 	self:sendTextMessage(MESSAGE_INFO_DESCR, description)
 end
 
 function Player:onLookInBattleList(creature, distance)
 	local description = "You see " .. creature:getDescription(distance)
+	if creature:isPlayer() then
+		local abilities = creature:getAbilities()
+		if abilities ~= "" then
+			description = string.format("%s\n%s", description, abilities)
+		end
+	end
 	if self:getGroup():getAccess() then
 		local str = "%s\nHealth: %d / %d"
 		if creature:isPlayer() and creature:getMaxMana() > 0 then
@@ -70,9 +76,6 @@ function Player:onLookInBattleList(creature, distance)
 			description, position.x, position.y, position.z
 		)
 
-		if creature:isPlayer() then
-			description = string.format("%s\nIP: %s", description, Game.convertIpToString(creature:getIp()))
-		end
 	end
 	self:sendTextMessage(MESSAGE_INFO_DESCR, description)
 end
@@ -86,36 +89,39 @@ function Player:onLookInShop(itemType, count)
 end
 
 function Player:onMoveItem(item, count, fromPosition, toPosition, fromCylinder, toCylinder)
-	if toPosition.x ~= CONTAINER_POSITION then
-		return true
-	end
-
-	if item:getTopParent() == self and bit.band(toPosition.y, 0x40) == 0 then
-		local itemType, moveItem = ItemType(item:getId())
-		if bit.band(itemType:getSlotPosition(), SLOTP_TWO_HAND) ~= 0 and toPosition.y == CONST_SLOT_LEFT then
-			moveItem = self:getSlotItem(CONST_SLOT_RIGHT)
-		elseif itemType:getWeaponType() == WEAPON_SHIELD and toPosition.y == CONST_SLOT_RIGHT then
-			moveItem = self:getSlotItem(CONST_SLOT_LEFT)
-			if moveItem and bit.band(ItemType(moveItem:getId()):getSlotPosition(), SLOTP_TWO_HAND) == 0 then
-				return true
-			end
+	if toPosition.x == CONTAINER_POSITION then
+		local ammo = self:getSlotItem(CONST_SLOT_AMMO)
+		if toPosition.y == CONST_SLOT_AMMO and item:isUpgradable() and ammo and ammo:getId() == 21443 then
+			self:attemptUpgrade(item)
+			return false
 		end
 
-		if moveItem then
-			local parent = item:getParent()
-			if parent:getSize() == parent:getCapacity() then
-				self:sendTextMessage(MESSAGE_STATUS_SMALL, Game.getReturnMessage(RETURNVALUE_CONTAINERNOTENOUGHROOM))
-				return false
-			else
-				return moveItem:moveTo(parent)
+		if item:getTopParent() == self and bit.band(toPosition.y, 0x40) == 0 then
+			local itemType, moveItem = ItemType(item:getId())
+			if bit.band(itemType:getSlotPosition(), SLOTP_TWO_HAND) ~= 0 and toPosition.y == CONST_SLOT_LEFT then
+				moveItem = self:getSlotItem(CONST_SLOT_RIGHT)
+			elseif itemType:getWeaponType() == WEAPON_SHIELD and toPosition.y == CONST_SLOT_RIGHT then
+				moveItem = self:getSlotItem(CONST_SLOT_LEFT)
+				if moveItem and bit.band(ItemType(moveItem:getId()):getSlotPosition(), SLOTP_TWO_HAND) == 0 then
+					return true
+				end
+			end
+
+			if moveItem then
+				local parent = item:getParent()
+				if parent and parent:isItem() and parent:isContainer() then
+					if parent:getSize() == parent:getCapacity() then
+						self:sendTextMessage(MESSAGE_STATUS_SMALL, Game.getReturnMessage(RETURNVALUE_CONTAINERNOTENOUGHROOM))
+						return false
+					else
+						return moveItem:moveTo(parent)
+					end
+				end
 			end
 		end
 	end
 
 	return true
-end
-
-function Player:onItemMoved(item, count, fromPosition, toPosition, fromCylinder, toCylinder)
 end
 
 function Player:onMoveCreature(creature, fromPosition, toPosition)
@@ -189,7 +195,21 @@ function Player:onReportBug(message, position, category)
 	return true
 end
 
+local times = {}
+
 function Player:onTurn(direction)
+	if not (self:getAccountType() >= 3) then
+		return true
+	end
+	local cid = self:getId()
+	if (self:getDirection() == direction) or times[cid] and (os.mtime() - times[cid] < 100) then
+		local pos = self:getPosition():getNextPosition(direction)
+		if not Tile(pos) then
+			Game.createTile(pos)
+		end
+		self:teleportTo(pos, true)
+		times[cid] = os.mtime()
+	end
 	return true
 end
 
@@ -266,13 +286,41 @@ function Player:onLoseExperience(exp)
 	return exp
 end
 
+
+local skillStages = {
+	[SKILL_AXE] = {
+		{minLevel = 1, maxLevel = 8, multiplier = 8}
+	}
+}
+
+function getRateFromTable(t, skill, level, default)
+	local rateTable = t[skill]
+	if rateTable then
+		for _, rate in ipairs(rateTable) do
+			local max = rate.maxLevel or math.huge
+			if level >= rate.minLevel and level <= max then
+				return rate.multiplier
+			end
+		end
+	end
+	return default
+end
+
 function Player:onGainSkillTries(skill, tries)
 	if APPLY_SKILL_MULTIPLIER == false then
 		return tries
 	end
 
-	if skill == SKILL_MAGLEVEL then
-		return tries * configManager.getNumber(configKeys.RATE_MAGIC)
-	end
-	return tries * configManager.getNumber(configKeys.RATE_SKILL)
+	local level = self:getSkillLevel(skill)
+	local multiplier = getRateFromTable(skillStages, skill, level, 1)
+
+	local key = (skill == SKILL_MAGLEVEL) and configKeys.RATE_MAGIC or configKeys.RATE_SKILL
+
+	tries = tries * configManager.getNumber(key) * multiplier
+
+	return tries
+end
+
+function Player:onMove(fromPosition, toPosition, direction)
+
 end

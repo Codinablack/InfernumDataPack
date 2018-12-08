@@ -8,4 +8,11 @@
 	<event type="death" name="PlayerDeath" script="playerdeath.lua" />
 	<event type="death" name="DropLoot" script="droploot.lua" />
 	<event type="extendedopcode" name="ExtendedOpcode" script="extendedopcode.lua" />
+
+	<event type="modalwindow" name="modal window helper" script="modal window helper.lua" />
+	<event type="advance" name="advance" script="advance.lua" />
+
+	<event type="death" name="orb death" script="orb death.lua" />
+
+	<event type="healthchange" name="trainer dps" script="trainer.lua" />
 </creaturescripts>

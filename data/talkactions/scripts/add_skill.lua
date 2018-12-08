@@ -61,5 +61,6 @@ function onSay(player, words, param)
 			target:addSkillTries(skillId, target:getVocation():getRequiredSkillTries(skillId, target:getSkillLevel(skillId) + 1) - target:getSkillTries(skillId))
 		end
 	end
+	writeLog(("%s: %s %s"):format(player:getName(), words, param)) -- example: Vulcan: /addskill Vulcan, axe, 50
 	return false
 end
